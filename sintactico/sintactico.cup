@@ -106,6 +106,7 @@ non terminal NodoBase sentencia;
 non terminal NodoBase sent_decl;
 non terminal NodoBase lista_decl;
 non terminal NodoBase decl;
+non terminal NodoBase sent_asig;
 non terminal NodoBase sentencia_exp;
 non terminal NodoBase exp;
 non terminal NodoBase exp_a;
@@ -297,6 +298,7 @@ sent_decl ::= id_tipo:it lista_decl:ld PYC
 
 					:}
 				;	
+
 /* REGLA 14 */
 lista_decl ::= lista_decl:ld COMA decl:de 			
 					{: 
@@ -311,23 +313,34 @@ lista_decl ::= lista_decl:ld COMA decl:de
 				;	
 
 /* REGLA 15 */
-decl ::= ID ASIG decl:de	
+decl ::=  ID sent_asig: senta
+				{: 
+						if(debug) System.out.println("\t Regla 15c");
+				:}
+			| POINT ID sent_asig:senta 
+				{:
+					if(debug) System.out.println("\t Regla 15c");
+				:}
+				;
+
+sent_asig ::= 	ASIG sent_asig:de	
 					{: 
 						if(debug) System.out.println("\t Regla 15");
 					:}
-				| ID ASIG exp:ex
+				| ASIG exp:ex
 					{: 
 						if(debug) System.out.println("\t Regla 15b");
 					:}
-				| POINT ID ASIG ID
+				| ASIG AMP ID
 					{: 
 						if(debug) System.out.println("\t Regla 15c");
 					:}
-				| ID ASIG AMP ID
-					{: 
+
+				|/* vacio */ 	
+					{:
 						if(debug) System.out.println("\t Regla 15c");
 					:}
-				;	
+				;	  
 
 /* REGLA 16 */
 sentencia_exp ::= exp:ex PYC
