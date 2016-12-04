@@ -1,4 +1,4 @@
-package Tiny;
+package compilador;
 
 import java_cup.runtime.*;
 import ast.*;
@@ -18,16 +18,17 @@ Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols
 		/*if (args.length==0) 
 			parser_obj=new parser(new Scanner(System.in,sf),sf);
 		else*/
-			parser_obj=new parser(new Scanner(new java.io.FileInputStream("prueba.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("prueba.mc"),sf),sf);
 
 		parser_obj.parse();
-		/*
+		
+		
 		NodoBase root=parser_obj.action_obj.getASTroot();
 		System.out.println();
 		System.out.println("IMPRESION DEL AST GENERADO");
 		System.out.println();
 		ast.Util.imprimirAST(root);
-		TablaSimbolos ts = new TablaSimbolos();
+		/*TablaSimbolos ts = new TablaSimbolos();
 		ts.cargarTabla(root);
 		ts.ImprimirClaves();
 		Tiny.Generador.setTablaSimbolos(ts);
@@ -139,15 +140,18 @@ precedence left MULT;
 /* REGLAS GRAMATICALES */
 
 /* REGLA 1*/
-programa 	::= lista_funciones:lf mainf:mf cuerpo:cu 
+programa 	::= lista_funciones:lf mainf:mf 
 					{: 
 						if(debug) System.out.println("\t Regla 1");
+						ast = new NodoPrograma(lf, mf);		
+						System.out.println(ast);
 
 			    	:}
-			    | mainf:mf cuerpo:cu
+			    | mainf:mf
 			    	{: 
-						if(debug) System.out.println("\t Regla 1b");
-
+						if(debug) System.out.println("\t Regla 1b");	
+						ast = new NodoPrograma(mf);	
+						System.out.println(ast);	
 				    :}
 				;
 
@@ -155,17 +159,28 @@ programa 	::= lista_funciones:lf mainf:mf cuerpo:cu
 lista_funciones ::= lista_funciones:lf funcion:fu 
 					{: 
 						if(debug) System.out.println("\t Regla 2");
-
+						NodoBase hijoActual = fu;
+					
+						if (hijoActual != null) {
+							while(hijoActual.TieneHermano()) {
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(lf);
+							RESULT = fu;
+						} else {
+							RESULT = lf;
+						}
 					:}
 				| funcion:fu
 					{: 
 						if(debug) System.out.println("\t Regla 2b");
+						RESULT = fu;
 
 			    	:}
 			    ;
 
 /* REGLA 3*/
-funcion ::=  tipo_f:tf ID LPAREN parametros RPAREN cuerpo 
+funcion ::=  tipo_f:tf ID LPAREN parametros:pa RPAREN cuerpo:cu 
 	  		    	{: 
 	  		    		if(debug) System.out.println("\t Regla 3");
 
@@ -173,12 +188,12 @@ funcion ::=  tipo_f:tf ID LPAREN parametros RPAREN cuerpo
 			    ;
 
 /* REGLA 4*/				
-mainf ::= VOID MAIN LPAREN /*vac�o */RPAREN 
+mainf ::= VOID MAIN LPAREN /*vac�o */RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 4");
 
 					:}
-				| INT MAIN LPAREN /* vacio */ RPAREN 
+				| INT MAIN LPAREN /* vacio */ RPAREN cuerpo:cu
 					{:
 						if(debug) System.out.println("\t Regla 4b");
 					:}
