@@ -178,6 +178,10 @@ mainf ::= VOID MAIN LPAREN /*vac�o */RPAREN
 						if(debug) System.out.println("\t Regla 4");
 
 					:}
+				| INT MAIN LPAREN /* vacio */ RPAREN 
+					{:
+						if(debug) System.out.println("\t Regla 4b");
+					:}
 				;
 
 /* REGLA  5 */						
@@ -315,278 +319,283 @@ lista_decl ::= lista_decl:ld COMA decl:de
 /* REGLA 15 */
 decl ::=  ID sent_asig: senta
 				{: 
-						if(debug) System.out.println("\t Regla 15c");
+						if(debug) System.out.println("\t Regla 15");
 				:}
 			| POINT ID sent_asig:senta 
 				{:
-					if(debug) System.out.println("\t Regla 15c");
+					if(debug) System.out.println("\t Regla 15b");
 				:}
 				;
 
+/* REGLA 16 */
 sent_asig ::= 	ASIG sent_asig:de	
 					{: 
-						if(debug) System.out.println("\t Regla 15");
+						if(debug) System.out.println("\t Regla 16");
 					:}
 				| ASIG exp:ex
 					{: 
-						if(debug) System.out.println("\t Regla 15b");
+						if(debug) System.out.println("\t Regla 16b");
 					:}
 				| ASIG AMP ID
 					{: 
-						if(debug) System.out.println("\t Regla 15c");
+						if(debug) System.out.println("\t Regla 16c");
 					:}
 
 				|/* vacio */ 	
 					{:
-						if(debug) System.out.println("\t Regla 15c");
+						if(debug) System.out.println("\t Regla 16c");
 					:}
 				;	  
 
-/* REGLA 16 */
+/* REGLA 17 */
 sentencia_exp ::= exp:ex PYC
 					{: 
-						if(debug) System.out.println("\t Regla 16");
+						if(debug) System.out.println("\t Regla 17");
 					:}
 				| PYC
 					{:
-						if(debug) System.out.println("\t Regla 16b");
-					:}
-				;
-
-/* REGLA 17 */
-exp ::=  exp:ex OR exp_l:el
-					{:
 						if(debug) System.out.println("\t Regla 17b");
-					:}
-				| exp_l:el
-					{:
-						if(debug) System.out.println("\t Regla 17c");
 					:}
 				;
 
 /* REGLA 18 */
-exp_l ::= exp_l:el AND simple_exp:se
-					{: 
-						if(debug) System.out.println("\t Regla 18");
-					:}
-				| simple_exp:se
+exp ::=  exp:ex OR exp_l:el
 					{:
 						if(debug) System.out.println("\t Regla 18b");
+					:}
+				| exp_l:el
+					{:
+						if(debug) System.out.println("\t Regla 18c");
 					:}
 				;
 
 /* REGLA 19 */
-simple_exp ::= simple_exp:ea relop:rl exp_a:ea2
+exp_l ::= exp_l:el AND simple_exp:se
 					{: 
 						if(debug) System.out.println("\t Regla 19");
 					:}
-				| exp_a:ea
+				| simple_exp:se
 					{:
 						if(debug) System.out.println("\t Regla 19b");
 					:}
 				;
 
 /* REGLA 20 */
-exp_a ::= exp_a:ea adop:ad term:te
+simple_exp ::= simple_exp:ea relop:rl exp_a:ea2
 					{: 
 						if(debug) System.out.println("\t Regla 20");
 					:}
-				| term:te
+				| exp_a:ea
 					{:
 						if(debug) System.out.println("\t Regla 20b");
 					:}
 				;
 
 /* REGLA 21 */
-adop ::= MAS
+exp_a ::= exp_a:ea adop:ad term:te
 					{: 
 						if(debug) System.out.println("\t Regla 21");
-
 					:}
-				| MENOS
+				| term:te
 					{:
 						if(debug) System.out.println("\t Regla 21b");
 					:}
 				;
 
 /* REGLA 22 */
-term ::= term:te mulop:mu factor:fa
+adop ::= MAS
 					{: 
 						if(debug) System.out.println("\t Regla 22");
+
 					:}
-				| factor:fa
+				| MENOS
 					{:
 						if(debug) System.out.println("\t Regla 22b");
 					:}
 				;
 
 /* REGLA 23 */
-mulop ::= MULT
+term ::= term:te mulop:mu factor:fa
 					{: 
 						if(debug) System.out.println("\t Regla 23");
 					:}
-				| DIV
+				| factor:fa
 					{:
 						if(debug) System.out.println("\t Regla 23b");
 					:}
 				;
 
 /* REGLA 24 */
-factor ::= 		LPAREN exp:ex RPAREN
+mulop ::= MULT
 					{: 
 						if(debug) System.out.println("\t Regla 24");
 					:}
-				| ID
+				| DIV
 					{:
 						if(debug) System.out.println("\t Regla 24b");
-					:}
-				| NUM
-					{:
-						if(debug) System.out.println("\t Regla 24c");
-					:}
-				| factor_bool: factor_bool 
-					{:
-						if(debug) System.out.println("\t Regla 24d");
 					:}
 				;
 
 /* REGLA 25 */
-relop ::= MENIG
+factor ::= 		LPAREN exp:ex RPAREN
 					{: 
 						if(debug) System.out.println("\t Regla 25");
 					:}
-				| MENOR
+				| ID
 					{:
 						if(debug) System.out.println("\t Regla 25b");
 					:}
-				| MAYOR
+				| NUM
 					{:
 						if(debug) System.out.println("\t Regla 25c");
 					:}
-				| MAYIG
+				| factor_bool: factor_bool 
 					{:
 						if(debug) System.out.println("\t Regla 25d");
 					:}
-				| IGUAL
+				| sent_call:stcall 
 					{:
 						if(debug) System.out.println("\t Regla 25e");
-					:}
-				| DIF
-					{:
-						if(debug) System.out.println("\t Regla 25f");
 					:}
 				;
 
 /* REGLA 26 */
-factor_bool ::= TRUE
+relop ::= MENIG
 					{: 
 						if(debug) System.out.println("\t Regla 26");
 					:}
-				| FALSE
+				| MENOR
 					{:
 						if(debug) System.out.println("\t Regla 26b");
+					:}
+				| MAYOR
+					{:
+						if(debug) System.out.println("\t Regla 26c");
+					:}
+				| MAYIG
+					{:
+						if(debug) System.out.println("\t Regla 26d");
+					:}
+				| IGUAL
+					{:
+						if(debug) System.out.println("\t Regla 26e");
+					:}
+				| DIF
+					{:
+						if(debug) System.out.println("\t Regla 26f");
 					:}
 				;
 
 /* REGLA 27 */
-sent_io ::= sent_puts:sp
+factor_bool ::= TRUE
 					{: 
 						if(debug) System.out.println("\t Regla 27");
 					:}
-				| sent_gets
+				| FALSE
 					{:
 						if(debug) System.out.println("\t Regla 27b");
 					:}
 				;
 
 /* REGLA 28 */
-sent_iter ::= sent_for:sf
+sent_io ::= sent_puts:sp
 					{: 
 						if(debug) System.out.println("\t Regla 28");
 					:}
-				| sent_while:sw
+				| sent_gets
 					{:
 						if(debug) System.out.println("\t Regla 28b");
 					:}
-				| sent_dw:sd
-					{:
-						if(debug) System.out.println("\t Regla 28c");
-					:}
 				;
 
-/* REGKA 29 */
-sent_if ::= IF LPAREN exp:ex RPAREN cuerpo:cu ELSE cuerpo:cu2
+/* REGLA 29 */
+sent_iter ::= sent_for:sf
 					{: 
 						if(debug) System.out.println("\t Regla 29");
 					:}
-				| IF LPAREN exp:ex RPAREN cuerpo:cu
+				| sent_while:sw
 					{:
 						if(debug) System.out.println("\t Regla 29b");
+					:}
+				| sent_dw:sd
+					{:
+						if(debug) System.out.println("\t Regla 29c");
 					:}
 				;
 
 /* REGLA 30 */
-sent_call ::= ID LPAREN sent_args:sent_args RPAREN PYC
-					{:
+sent_if ::= IF LPAREN exp:ex RPAREN cuerpo:cu ELSE cuerpo:cu2
+					{: 
 						if(debug) System.out.println("\t Regla 30");
 					:}
-			 	;
-
-/* REGLA 31 */
-sent_args ::= sent_args:sent_args COMA exp:ex
+				| IF LPAREN exp:ex RPAREN cuerpo:cu
 					{:
-						if(debug) System.out.println("\t Regla 31");
-					:}
-				| exp:ex
-					{:
-						if(debug) System.out.println("\t Regla 31b");
+						if(debug) System.out.println("\t Regla 30b");
 					:}
 				;
 
+/* REGLA 31 */
+sent_call ::= ID LPAREN sent_args:sent_args RPAREN PYC
+					{:
+						if(debug) System.out.println("\t Regla 31");
+					:}
+			 	;
+
 /* REGLA 32 */
-sent_return ::= RETURN PYC
-					{: 
+sent_args ::= sent_args:sent_args COMA exp:ex
+					{:
 						if(debug) System.out.println("\t Regla 32");
 					:}
-				| RETURN exp:ex PYC
+				| exp:ex
 					{:
 						if(debug) System.out.println("\t Regla 32b");
 					:}
 				;
 
 /* REGLA 33 */
-sent_puts ::=  PUTS LPAREN exp_a:ea RPAREN PYC
-					{:
+sent_return ::= RETURN PYC
+					{: 
 						if(debug) System.out.println("\t Regla 33");
+					:}
+				| RETURN exp:ex PYC
+					{:
+						if(debug) System.out.println("\t Regla 33b");
 					:}
 				;
 
-
 /* REGLA 34 */
-sent_gets ::= GETS LPAREN NUM RPAREN PYC
-					{: 
+sent_puts ::=  PUTS LPAREN exp_a:ea RPAREN PYC
+					{:
 						if(debug) System.out.println("\t Regla 34");
 					:}
 				;
 
+
 /* REGLA 35 */
-sent_for ::= FOR LPAREN sent_decl:sd sentencia_exp:se exp:ex RPAREN cuerpo:cu
+sent_gets ::= GETS LPAREN ID RPAREN PYC
 					{: 
 						if(debug) System.out.println("\t Regla 35");
 					:}
 				;
 
 /* REGLA 36 */
-sent_while ::= WHILE LPAREN exp_l:el RPAREN cuerpo:cu
+sent_for ::= FOR LPAREN sent_decl:sd sentencia_exp:se decl:decl RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 36");
 					:}
 				;
 
 /* REGLA 37 */
-sent_dw ::= DO cuerpo:cu WHILE LPAREN exp_l:el RPAREN PYC
+sent_while ::= WHILE LPAREN exp_l:el RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 37");
+					:}
+				;
+
+/* REGLA 38 */
+sent_dw ::= DO cuerpo:cu WHILE LPAREN exp_l:el RPAREN PYC
+					{: 
+						if(debug) System.out.println("\t Regla 38");
 					:}
 				;
 
