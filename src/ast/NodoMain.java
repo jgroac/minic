@@ -1,6 +1,6 @@
 package ast;
 
-public class NodoMain {
+public class NodoMain extends NodoBase {
 	private NodoBase cuerpo;
 	
 	public NodoMain(NodoBase cuerpo){
