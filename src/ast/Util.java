@@ -11,6 +11,18 @@ public class Util {
 		    printSpaces();
 		    if (raiz instanceof  NodoIf)
 		    	System.out.println("If");
+		    else if ( raiz instanceof NodoPrograma)
+		    	System.out.println("Programa");
+		    
+		    else if ( raiz instanceof NodoMain)
+		    	System.out.println("Programa");
+		    
+		    else if (raiz instanceof NodoCuerpo)
+		    	System.out.println("Cuerpo");
+		   
+		    else if (raiz instanceof NodoReturn)
+		    	System.out.println("return");
+		    
 		    else if (raiz instanceof  NodoRepeat)
 		    	System.out.println("Repeat");
 		    

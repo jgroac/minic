@@ -1,6 +1,6 @@
 package ast;
 
-public class NodoReturn {
+public class NodoReturn extends NodoBase {
 	
 	private NodoBase exp;
 	
