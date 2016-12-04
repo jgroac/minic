@@ -15,10 +15,10 @@ Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols
 	public static void main(String args[]) throws Exception {
 		SymbolFactory sf = new DefaultSymbolFactory();
 		parser parser_obj;
-		if (args.length==0) 
+		/*if (args.length==0) 
 			parser_obj=new parser(new Scanner(System.in,sf),sf);
-		else
-			parser_obj=new parser(new Scanner(new java.io.FileInputStream("NombreArchivo.Extension"),sf),sf);
+		else*/
+			parser_obj=new parser(new Scanner(new java.io.FileInputStream("prueba.mc"),sf),sf);
 
 		parser_obj.parse();
 		/*
