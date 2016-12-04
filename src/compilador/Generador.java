@@ -98,7 +98,7 @@ public class Generador {
 		localidadSaltoElse = UtGen.emitirSalto(1);
 		UtGen.emitirComentario("If: el salto hacia el else debe estar aqui");
 		/*Genero la parte THEN*/
-		generar(n.getParteThen());
+		generar(n.getCuerpoIf());
 		localidadSaltoEnd = UtGen.emitirSalto(1);
 		UtGen.emitirComentario("If: el salto hacia el final debe estar aqui");
 		localidadActual = UtGen.emitirSalto(0);
@@ -106,8 +106,8 @@ public class Generador {
 		UtGen.emitirRM_Abs("JEQ", UtGen.AC, localidadActual, "if: jmp hacia else");
 		UtGen.restaurarRespaldo();
 		/*Genero la parte ELSE*/
-		if(n.getParteElse()!=null){
-			generar(n.getParteElse());
+		if(n.getCuerpoElse()!=null){
+			generar(n.getCuerpoElse());
 			localidadActual = UtGen.emitirSalto(0);
 			UtGen.cargarRespaldo(localidadSaltoEnd);
 			UtGen.emitirRM_Abs("LDA", UtGen.PC, localidadActual, "if: jmp hacia el final");

@@ -36,9 +36,9 @@ public class TablaSimbolos {
 	    /* Hago el recorrido recursivo */
 	    if (raiz instanceof  NodoIf){
 	    	cargarTabla(((NodoIf)raiz).getPrueba());
-	    	cargarTabla(((NodoIf)raiz).getParteThen());
-	    	if(((NodoIf)raiz).getParteElse()!=null){
-	    		cargarTabla(((NodoIf)raiz).getParteElse());
+	    	cargarTabla(((NodoIf)raiz).getCuerpoIf());
+	    	if(((NodoIf)raiz).hasElse()){
+	    		cargarTabla(((NodoIf)raiz).getCuerpoElse());
 	    	}
 	    }
 	    else if (raiz instanceof  NodoRepeat){

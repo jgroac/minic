@@ -2,15 +2,19 @@ package ast;
 
 public class NodoLeer extends NodoBase {
 	private String id;
+	private NodoBase array;
+	private NodoBase posArray;
 
 	public NodoLeer(String identificador) {
 		super();
 		this.id = identificador;
 	}
 
-	public NodoLeer() {
+	public NodoLeer(NodoBase array) {
 		super();
-		id="";
+		this.id = ((NodoIdentificador) array ).getNombre();
+		this.array = array;
+		this.posArray = ((NodoIdentificador)array ).getExpresion();
 	}
 
 	public String getIdentificador() {

@@ -1,24 +1,25 @@
 package ast;
 
 public class NodoEscribir extends NodoBase {
-	private NodoBase expresion;
 
-	public NodoEscribir(NodoBase expresion) {
-		super();
-		this.expresion = expresion;
-	}
+		private NodoBase expresion;
 
-	public NodoEscribir() {
-		super();
-		expresion=null;
-	}
+		public NodoEscribir(NodoBase expresion) {
+			super();
+			this.expresion = expresion;
+		}
 
-	public NodoBase getExpresion() {
-		return expresion;
-	}
+		public NodoEscribir() {
+			super();
+			expresion=null;
+		}
 
-	public void setExpresion(NodoBase expresion) {
-		this.expresion = expresion;
-	}
+		public NodoBase getExpresion() {
+			return expresion;
+		}
+
+		public void setExpresion(NodoBase expresion) {
+			this.expresion = expresion;
+		}
 	
 }

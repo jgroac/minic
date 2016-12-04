@@ -36,11 +36,11 @@ public class Util {
 		    	imprimirAST(((NodoIf)raiz).getPrueba());
 		    	printSpaces();
 		    	System.out.println("**Then IF**");
-		    	imprimirAST(((NodoIf)raiz).getParteThen());
-		    	if(((NodoIf)raiz).getParteElse()!=null){
+		    	imprimirAST(((NodoIf)raiz).getCuerpoIf());
+		    	if(((NodoIf)raiz).hasElse()){
 		    		printSpaces();
 		    		System.out.println("**Else IF**");
-		    		imprimirAST(((NodoIf)raiz).getParteElse());
+		    		imprimirAST(((NodoIf)raiz).getCuerpoElse());
 		    	}
 		    }
 		    else if (raiz instanceof  NodoRepeat){
