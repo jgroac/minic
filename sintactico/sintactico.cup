@@ -191,11 +191,13 @@ funcion ::=  tipo_f:tf ID LPAREN parametros:pa RPAREN cuerpo:cu
 mainf ::= VOID MAIN LPAREN /*vac�o */RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 4");
+						RESULT = NodoMain(cu);
 
 					:}
 				| INT MAIN LPAREN /* vacio */ RPAREN cuerpo:cu
 					{:
 						if(debug) System.out.println("\t Regla 4b");
+						RESULT = NodoMain(cu);
 					:}
 				;
 
