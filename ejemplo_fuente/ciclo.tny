@@ -1,0 +1,6 @@
+read x; { input an integer }
+repeat
+    write x;
+    x := x - 1
+until x = 0;
+end

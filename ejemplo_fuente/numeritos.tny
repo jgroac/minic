@@ -1,0 +1,7 @@
+read paso;
+c:=0;
+repeat
+  c:=c+paso;
+  write c
+until 100<c;
+write 1000

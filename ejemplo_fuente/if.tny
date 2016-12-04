@@ -1,0 +1,5 @@
+if 33 < 99 then 
+  write 33;
+else
+  write 99;
+end

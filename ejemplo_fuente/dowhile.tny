@@ -1,0 +1,6 @@
+read x; { ingrese cantidad de veces }
+c:=0;
+do 
+	c := c+1;
+	write c
+while c<x end

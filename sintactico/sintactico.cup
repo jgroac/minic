@@ -1,0 +1,586 @@
+package Tiny;
+
+import java_cup.runtime.*;
+import ast.*;
+//import otros.*;
+
+parser code {:
+
+/***********
+SymbolFactory es una nueva caracteristica que ha sido a�adida a las version 11a de cup, la cual facilita la implementacion de clases Symbol personalizadas
+, esto debido a que dicha clase no provee mucha informaci�n de contexto que podria ser util para el analisis semantico o ayudar en la construccion del AST
+Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols-in-cup/
+***********/
+
+	public static void main(String args[]) throws Exception {
+		SymbolFactory sf = new DefaultSymbolFactory();
+		parser parser_obj;
+		if (args.length==0) 
+			parser_obj=new parser(new Scanner(System.in,sf),sf);
+		else
+			parser_obj=new parser(new Scanner(new java.io.FileInputStream("NombreArchivo.Extension"),sf),sf);
+
+		parser_obj.parse();
+		/*
+		NodoBase root=parser_obj.action_obj.getASTroot();
+		System.out.println();
+		System.out.println("IMPRESION DEL AST GENERADO");
+		System.out.println();
+		ast.Util.imprimirAST(root);
+		TablaSimbolos ts = new TablaSimbolos();
+		ts.cargarTabla(root);
+		ts.ImprimirClaves();
+		Tiny.Generador.setTablaSimbolos(ts);
+		Tiny.Generador.generarCodigoObjeto(root);
+		*/
+	}
+
+:}
+
+action code {:
+	private boolean debug=true;
+	private NodoBase ast=null;
+	private int lineanum=0;
+	
+	//Debe ser llamada solo despues de un parse(), en caso contrario retornara null siempre;
+	public NodoBase getASTroot(){
+		return ast;
+	}
+	
+:}
+
+/* Simbolos Terminales */
+
+terminal MAIN;
+terminal VOID;
+terminal RETURN;
+terminal BOOL;
+terminal INT;
+terminal POINT;
+terminal PUTS;
+terminal GETS;
+terminal FOR;
+terminal DO;
+terminal WHILE;
+terminal MAS;
+terminal MENOS;
+terminal MULT;
+terminal DIV;
+terminal ASIG;
+terminal MENOR;
+terminal MENIG;
+terminal MAYOR;
+terminal MAYIG;
+terminal IGUAL;
+terminal DIF;
+terminal AND;
+terminal OR;
+terminal IF;
+terminal ELSE;
+terminal LPAREN;
+terminal RPAREN;
+terminal LLI;
+terminal LLD;
+terminal PYC;
+terminal COMA;
+terminal AMP;
+terminal Integer NUM;
+terminal String ID;
+terminal boolean FALSE;
+terminal boolean TRUE;
+
+/* Simbolos No Terminales */
+
+non terminal programa;
+non terminal NodoBase lista_funciones;
+non terminal NodoBase funcion;
+non terminal NodoBase mainf;
+non terminal NodoBase parametros;
+non terminal NodoBase lista_parametros;
+non terminal NodoBase parametro;
+non terminal NodoBase id_tipo;
+non terminal NodoBase tipo_f;
+non terminal NodoBase cuerpo;
+non terminal NodoBase lista_sentencias;
+non terminal NodoBase sentencia;
+non terminal NodoBase sent_decl;
+non terminal NodoBase lista_decl;
+non terminal NodoBase decl;
+non terminal NodoBase sentencia_exp;
+non terminal NodoBase exp;
+non terminal NodoBase exp_a;
+non terminal NodoBase adop;
+non terminal NodoBase term;
+non terminal NodoBase mulop;
+non terminal NodoBase factor;
+non terminal NodoBase exp_l;
+non terminal NodoBase relop;
+non terminal NodoBase factor_bool;
+non terminal NodoBase sent_io;
+non terminal NodoBase sent_iter;
+non terminal NodoBase sent_if;
+non terminal NodoBase sent_call;
+non terminal NodoBase sent_args;
+non terminal NodoBase sent_return;
+non terminal NodoBase sent_puts;
+non terminal NodoBase sent_gets;
+non terminal NodoBase sent_for;
+non terminal NodoBase sent_while;
+non terminal NodoBase sent_dw;
+non terminal NodoBase simple_exp;
+
+/* Precedencia de operadores */
+
+precedence left MAS;
+precedence left MENOS;
+precedence left MULT;
+
+/* REGLAS GRAMATICALES */
+
+/* REGLA 1*/
+programa 	::= lista_funciones:lf mainf:mf cuerpo:cu 
+					{: 
+						if(debug) System.out.println("\t Regla 1");
+
+			    	:}
+			    | mainf:mf cuerpo:cu
+			    	{: 
+						if(debug) System.out.println("\t Regla 1b");
+
+				    :}
+				;
+
+/* REGLA 2*/
+lista_funciones ::= lista_funciones:lf funcion:fu 
+					{: 
+						if(debug) System.out.println("\t Regla 2");
+
+					:}
+				| funcion:fu
+					{: 
+						if(debug) System.out.println("\t Regla 2b");
+
+			    	:}
+			    ;
+
+/* REGLA 3*/
+funcion ::=  tipo_f:tf ID LPAREN parametros RPAREN cuerpo 
+	  		    	{: 
+	  		    		if(debug) System.out.println("\t Regla 3");
+
+			    	:}
+			    ;
+
+/* REGLA 4*/				
+mainf ::= VOID MAIN LPAREN /*vac�o */RPAREN 
+					{: 
+						if(debug) System.out.println("\t Regla 4");
+
+					:}
+				;
+
+/* REGLA  5 */						
+parametros ::= lista_parametros:lp | 
+					{: 
+						if(debug) System.out.println("\t Regla 5");
+					:}
+				| INT MAIN MAIN LPAREN RPAREN 
+					{: 
+						if(debug) System.out.println("\t Regla 5b");
+
+					:}
+				;
+
+/* REGLA 6 */
+lista_parametros ::= lista_parametros:lp COMA parametro:pa 
+					{: 
+						if(debug) System.out.println("\t Regla 6");
+					:}
+				| parametro:pa
+					{: 
+						if(debug) System.out.println("\t Regla 6b");
+					:}
+				;
+
+/* REGLA 7 */			
+parametro ::= id_tipo:it ID
+					{: 
+						if(debug) System.out.println("\t Regla 7");
+
+					:}
+				;	
+ 
+/* REGLA 8 */
+id_tipo ::= INT 
+					{: 
+						if(debug) System.out.println("\t Regla 8");
+					:}	
+				| BOOL
+					{: 
+						if(debug) System.out.println("\t Regla 8b");
+					:}
+				;
+
+/* REGLA 9 */		
+tipo_f ::= INT  
+					{: 
+						if(debug) System.out.println("\t Regla 9");	
+
+					:}
+				| BOOL
+					{: 
+						if(debug) System.out.println("\t Regla 9a");	
+
+					:}
+				| VOID
+					{: 
+						if(debug) System.out.println("\t Regla 9b");	
+
+					:}
+				;	
+
+/* REGLA 10 */					
+cuerpo ::= LLI lista_sentencias:ls LLD				
+					{: 
+						if(debug) System.out.println("\t Regla 10");
+
+					:}
+				;	
+
+/* REGLA 11 */				
+lista_sentencias ::= lista_sentencias:ls sentencia:se 
+					{: 
+						if(debug) System.out.println("\t Regla 11");
+					:}
+				| sentencia:se
+					{: 
+						if(debug) System.out.println("\t Regla 11b");
+					:}
+				;
+
+/* REGLA 12 */
+sentencia ::= sent_decl:sd
+					{:
+						if(debug) System.out.println("\t Regla 12");
+					:}
+				| sent_io
+					{:
+						if(debug) System.out.println("\t Regla 12b");
+					:}
+				| sent_iter
+					{:
+						if(debug) System.out.println("\t Regla 12c");
+					:}
+				| sent_if
+					{:
+						if(debug) System.out.println("\t Regla 12d");
+					:}
+				| sent_call
+					{:
+						if(debug) System.out.println("\t Regla 12e");
+					:}
+				| sent_return
+					{:
+						if(debug) System.out.println("\t Regla 12e");
+					:}
+				;
+
+/* REGLA 13 */
+sent_decl ::= id_tipo:it lista_decl:ld PYC 			
+					{: 
+						if(debug) System.out.println("\t Regla 13");
+
+					:}
+				| lista_decl:ld PYC	
+					{: 
+						if(debug) System.out.println("\t Regla 13b");
+
+					:}
+				;	
+/* REGLA 14 */
+lista_decl ::= lista_decl:ld COMA decl:de 			
+					{: 
+						if(debug) System.out.println("\t Regla 14");
+
+					:}
+				| decl:de	
+					{: 
+						if(debug) System.out.println("\t Regla 14b");
+
+					:}
+				;	
+
+/* REGLA 15 */
+decl ::= ID ASIG decl:de	
+					{: 
+						if(debug) System.out.println("\t Regla 15");
+					:}
+				| ID ASIG exp:ex
+					{: 
+						if(debug) System.out.println("\t Regla 15b");
+					:}
+				| POINT ID ASIG ID
+					{: 
+						if(debug) System.out.println("\t Regla 15c");
+					:}
+				| ID ASIG AMP ID
+					{: 
+						if(debug) System.out.println("\t Regla 15c");
+					:}
+				;	
+
+/* REGLA 16 */
+sentencia_exp ::= exp:ex PYC
+					{: 
+						if(debug) System.out.println("\t Regla 16");
+					:}
+				| PYC
+					{:
+						if(debug) System.out.println("\t Regla 16b");
+					:}
+				;
+
+/* REGLA 17 */
+exp ::=  exp:ex OR exp_l:el
+					{:
+						if(debug) System.out.println("\t Regla 17b");
+					:}
+				| exp_l:el
+					{:
+						if(debug) System.out.println("\t Regla 17c");
+					:}
+				;
+
+/* REGLA 18 */
+exp_l ::= exp_l:el AND simple_exp:se
+					{: 
+						if(debug) System.out.println("\t Regla 18");
+					:}
+				| simple_exp:se
+					{:
+						if(debug) System.out.println("\t Regla 18b");
+					:}
+				;
+
+/* REGLA 19 */
+simple_exp ::= simple_exp:ea relop:rl exp_a:ea2
+					{: 
+						if(debug) System.out.println("\t Regla 19");
+					:}
+				| exp_a:ea
+					{:
+						if(debug) System.out.println("\t Regla 19b");
+					:}
+				;
+
+/* REGLA 20 */
+exp_a ::= exp_a:ea adop:ad term:te
+					{: 
+						if(debug) System.out.println("\t Regla 20");
+					:}
+				| term:te
+					{:
+						if(debug) System.out.println("\t Regla 20b");
+					:}
+				;
+
+/* REGLA 21 */
+adop ::= MAS
+					{: 
+						if(debug) System.out.println("\t Regla 21");
+
+					:}
+				| MENOS
+					{:
+						if(debug) System.out.println("\t Regla 21b");
+					:}
+				;
+
+/* REGLA 22 */
+term ::= term:te mulop:mu factor:fa
+					{: 
+						if(debug) System.out.println("\t Regla 22");
+					:}
+				| factor:fa
+					{:
+						if(debug) System.out.println("\t Regla 22b");
+					:}
+				;
+
+/* REGLA 23 */
+mulop ::= MULT
+					{: 
+						if(debug) System.out.println("\t Regla 23");
+					:}
+				| DIV
+					{:
+						if(debug) System.out.println("\t Regla 23b");
+					:}
+				;
+
+/* REGLA 24 */
+factor ::= 		LPAREN exp:ex RPAREN
+					{: 
+						if(debug) System.out.println("\t Regla 24");
+					:}
+				| ID
+					{:
+						if(debug) System.out.println("\t Regla 24b");
+					:}
+				| NUM
+					{:
+						if(debug) System.out.println("\t Regla 24c");
+					:}
+				| factor_bool: factor_bool 
+					{:
+						if(debug) System.out.println("\t Regla 24d");
+					:}
+				;
+
+/* REGLA 25 */
+relop ::= MENIG
+					{: 
+						if(debug) System.out.println("\t Regla 25");
+					:}
+				| MENOR
+					{:
+						if(debug) System.out.println("\t Regla 25b");
+					:}
+				| MAYOR
+					{:
+						if(debug) System.out.println("\t Regla 25c");
+					:}
+				| MAYIG
+					{:
+						if(debug) System.out.println("\t Regla 25d");
+					:}
+				| IGUAL
+					{:
+						if(debug) System.out.println("\t Regla 25e");
+					:}
+				| DIF
+					{:
+						if(debug) System.out.println("\t Regla 25f");
+					:}
+				;
+
+/* REGLA 26 */
+factor_bool ::= TRUE
+					{: 
+						if(debug) System.out.println("\t Regla 26");
+					:}
+				| FALSE
+					{:
+						if(debug) System.out.println("\t Regla 26b");
+					:}
+				;
+
+/* REGLA 27 */
+sent_io ::= sent_puts:sp
+					{: 
+						if(debug) System.out.println("\t Regla 27");
+					:}
+				| sent_gets
+					{:
+						if(debug) System.out.println("\t Regla 27b");
+					:}
+				;
+
+/* REGLA 28 */
+sent_iter ::= sent_for:sf
+					{: 
+						if(debug) System.out.println("\t Regla 28");
+					:}
+				| sent_while:sw
+					{:
+						if(debug) System.out.println("\t Regla 28b");
+					:}
+				| sent_dw:sd
+					{:
+						if(debug) System.out.println("\t Regla 28c");
+					:}
+				;
+
+/* REGKA 29 */
+sent_if ::= IF LPAREN exp:ex RPAREN cuerpo:cu ELSE cuerpo:cu2
+					{: 
+						if(debug) System.out.println("\t Regla 29");
+					:}
+				| IF LPAREN exp:ex RPAREN cuerpo:cu
+					{:
+						if(debug) System.out.println("\t Regla 29b");
+					:}
+				;
+
+/* REGLA 30 */
+sent_call ::= ID LPAREN sent_args:sent_args RPAREN PYC
+					{:
+						if(debug) System.out.println("\t Regla 30");
+					:}
+			 	;
+
+/* REGLA 31 */
+sent_args ::= sent_args:sent_args COMA exp:ex
+					{:
+						if(debug) System.out.println("\t Regla 31");
+					:}
+				| exp:ex
+					{:
+						if(debug) System.out.println("\t Regla 31b");
+					:}
+				;
+
+/* REGLA 32 */
+sent_return ::= RETURN PYC
+					{: 
+						if(debug) System.out.println("\t Regla 32");
+					:}
+				| RETURN exp:ex PYC
+					{:
+						if(debug) System.out.println("\t Regla 32b");
+					:}
+				;
+
+/* REGLA 33 */
+sent_puts ::=  PUTS LPAREN exp_a:ea RPAREN PYC
+					{:
+						if(debug) System.out.println("\t Regla 33");
+					:}
+				;
+
+
+/* REGLA 34 */
+sent_gets ::= GETS LPAREN NUM RPAREN PYC
+					{: 
+						if(debug) System.out.println("\t Regla 34");
+					:}
+				;
+
+/* REGLA 35 */
+sent_for ::= FOR LPAREN sent_decl:sd sentencia_exp:se exp:ex RPAREN cuerpo:cu
+					{: 
+						if(debug) System.out.println("\t Regla 35");
+					:}
+				;
+
+/* REGLA 36 */
+sent_while ::= WHILE LPAREN exp_l:el RPAREN cuerpo:cu
+					{: 
+						if(debug) System.out.println("\t Regla 36");
+					:}
+				;
+
+/* REGLA 37 */
+sent_dw ::= DO cuerpo:cu WHILE LPAREN exp_l:el RPAREN PYC
+					{: 
+						if(debug) System.out.println("\t Regla 37");
+					:}
+				;
+
+
+
+
+
+
+
+

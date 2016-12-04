@@ -1,0 +1,9 @@
+read x;
+read y;
+contador:=y;
+r:=0;
+repeat
+   r:=r+x+y;
+   contador:=contador-1
+until contador=0;
+write r

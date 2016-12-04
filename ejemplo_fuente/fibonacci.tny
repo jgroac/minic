@@ -1,0 +1,5 @@
+read x; { ingrese cantidad de veces }
+while x < 10 do
+x := x+1;
+write x	
+end
