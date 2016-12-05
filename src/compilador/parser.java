@@ -496,7 +496,7 @@ class CUP$parser$actions {
 		NodoBase cu = (NodoBase)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		 
 						if(debug) System.out.println("\t Regla 36");
-						RESULT = new NodoFor(); // TODO COMPLETAR NODO
+						RESULT = new NodoFor(null, null, null); // TODO COMPLETAR NODO
 					
               CUP$parser$result = parser.getSymbolFactory().newSymbol("sent_for",34, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-6)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
