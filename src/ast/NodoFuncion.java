@@ -1,6 +1,6 @@
 package ast;
 
-public class NodoFuncion {
+public class NodoFuncion extends NodoBase {
 	private String tipo_funcion;
 	private String nombre_funcion;
 	private NodoBase args;
@@ -29,7 +29,17 @@ public class NodoFuncion {
 	}
 	
 	
-	public NodoFuncion(String tipo_funcion, String nombre_funcion, NodoBase args, int numero_args, NodoBase cuerpo)
+	public NodoFuncion(String tipo_funcion, String nombre_funcion, NodoBase args, NodoBase cuerpo)
+	{
+		super();
+		this.tipo_funcion = tipo_funcion;
+		this.nombre_funcion = nombre_funcion;
+		this.args = args;
+		this.cuerpo = cuerpo;
+		this.numero_args = 0;
+	}
+	
+	public NodoFuncion(String tipo_funcion, String nombre_funcion, NodoBase args, NodoBase cuerpo, int numero_args)
 	{
 		super();
 		this.tipo_funcion = tipo_funcion;

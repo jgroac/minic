@@ -85,7 +85,7 @@ terminal LLD;
 terminal PYC;
 terminal COMA;
 terminal AMP;
-terminal Integer NUM;
+terminal String NUM;
 terminal String ID;
 terminal boolean FALSE;
 terminal boolean TRUE;
@@ -99,8 +99,8 @@ non terminal NodoBase mainf;
 non terminal NodoBase parametros;
 non terminal NodoBase lista_parametros;
 non terminal NodoBase parametro;
-non terminal NodoBase id_tipo;
-non terminal NodoBase tipo_f;
+non terminal String id_tipo;
+non terminal String tipo_f;
 non terminal NodoBase cuerpo;
 non terminal NodoBase lista_sentencias;
 non terminal NodoBase sentencia;
@@ -141,13 +141,12 @@ precedence left MULT;
 
 /* REGLA 1*/
 programa 	::= lista_funciones:lf mainf:mf 
-					{: 
-						if(debug) System.out.println("\t Regla 1");
-						ast = new NodoPrograma(lf, mf);		
-						System.out.println(ast);
-
-			    	:}
-			    | mainf:mf
+			    	{: 
+						if(debug) System.out.println("\t Regla 1");	
+						ast = new NodoPrograma(lf, mf);	
+						System.out.println(ast);	
+				    :}
+				| mainf:mf
 			    	{: 
 						if(debug) System.out.println("\t Regla 1b");	
 						ast = new NodoPrograma(mf);	
@@ -159,7 +158,7 @@ programa 	::= lista_funciones:lf mainf:mf
 lista_funciones ::= lista_funciones:lf funcion:fu 
 					{: 
 						if(debug) System.out.println("\t Regla 2");
-						NodoBase hijoActual = fu;
+						NodoBase hijoActual = lf;
 					
 						if (hijoActual != null) {
 							while(hijoActual.TieneHermano()) {
@@ -168,22 +167,21 @@ lista_funciones ::= lista_funciones:lf funcion:fu
 							hijoActual.setHermanoDerecha(lf);
 							RESULT = fu;
 						} else {
-							RESULT = lf;
+							RESULT = fu;
 						}
 					:}
-				| funcion:fu
+				| funcion:fuc
 					{: 
 						if(debug) System.out.println("\t Regla 2b");
-						RESULT = fu;
-
+						RESULT = fuc;
 			    	:}
-			    ;
+				;
 
 /* REGLA 3*/
-funcion ::=  tipo_f:tf ID LPAREN parametros:pa RPAREN cuerpo:cu 
+funcion ::=  tipo_f:tipo ID:nombre LPAREN parametros:pa RPAREN cuerpo:cu 
 	  		    	{: 
 	  		    		if(debug) System.out.println("\t Regla 3");
-
+						RESULT = new NodoFuncion(tipo, nombre, pa, cu);
 			    	:}
 			    ;
 
@@ -191,30 +189,31 @@ funcion ::=  tipo_f:tf ID LPAREN parametros:pa RPAREN cuerpo:cu
 mainf ::= VOID MAIN LPAREN /*vac�o */RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 4");
-						RESULT = NodoMain(cu);
+						RESULT = new NodoMain(cu);
 
 					:}
 				| INT MAIN LPAREN /* vacio */ RPAREN cuerpo:cu
 					{:
 						if(debug) System.out.println("\t Regla 4b");
-						RESULT = NodoMain(cu);
+						RESULT = new NodoMain(cu);
 					:}
 				;
 
 /* REGLA  5 */						
-parametros ::= lista_parametros:lp | 
+parametros ::= lista_parametros:lp
 					{: 
 						if(debug) System.out.println("\t Regla 5");
+						RESULT = lp;
 					:}
-				| INT MAIN MAIN LPAREN RPAREN 
+				| /* vacio */
 					{: 
 						if(debug) System.out.println("\t Regla 5b");
-
+						RESULT = null;
 					:}
 				;
 
 /* REGLA 6 */
-lista_parametros ::= lista_parametros:lp COMA parametro:pa 
+lista_parametros ::= parametro:pa COMA lista_parametros:lp
 					{: 
 						if(debug) System.out.println("\t Regla 6");
 					:}
@@ -236,10 +235,12 @@ parametro ::= id_tipo:it ID
 id_tipo ::= INT 
 					{: 
 						if(debug) System.out.println("\t Regla 8");
+						RESULT = "Integer";
 					:}	
 				| BOOL
 					{: 
 						if(debug) System.out.println("\t Regla 8b");
+						RESULT = "Boolean";
 					:}
 				;
 
@@ -247,17 +248,17 @@ id_tipo ::= INT
 tipo_f ::= INT  
 					{: 
 						if(debug) System.out.println("\t Regla 9");	
-
+						RESULT = "Integer";
 					:}
 				| BOOL
 					{: 
-						if(debug) System.out.println("\t Regla 9a");	
-
+						if(debug) System.out.println("\t Regla 9a");
+						RESULT = "Boolean";	
 					:}
 				| VOID
 					{: 
 						if(debug) System.out.println("\t Regla 9b");	
-
+						RESULT = "Void";
 					:}
 				;	
 
@@ -265,18 +266,31 @@ tipo_f ::= INT
 cuerpo ::= LLI lista_sentencias:ls LLD				
 					{: 
 						if(debug) System.out.println("\t Regla 10");
-
+						RESULT = ls;
 					:}
 				;	
 
 /* REGLA 11 */				
-lista_sentencias ::= lista_sentencias:ls sentencia:se 
+lista_sentencias ::= sentencia:se lista_sentencias:ls 
 					{: 
 						if(debug) System.out.println("\t Regla 11");
+
+						NodoBase hijoActual = se;
+					
+						if (hijoActual != null) {
+							while(hijoActual.TieneHermano()) {
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(ls);
+							RESULT = se;
+						} else {
+							RESULT = ls;
+						}
 					:}
 				| sentencia:se
 					{: 
 						if(debug) System.out.println("\t Regla 11b");
+						RESULT = se;
 					:}
 				;
 
@@ -284,26 +298,32 @@ lista_sentencias ::= lista_sentencias:ls sentencia:se
 sentencia ::= sent_decl:sd
 					{:
 						if(debug) System.out.println("\t Regla 12");
+						RESULT = sd;
 					:}
-				| sent_io
+				| sent_io: sio
 					{:
 						if(debug) System.out.println("\t Regla 12b");
+						RESULT = sio;
 					:}
-				| sent_iter
+				| sent_iter:siter
 					{:
 						if(debug) System.out.println("\t Regla 12c");
+						RESULT = siter;
 					:}
-				| sent_if
+				| sent_if:sif
 					{:
 						if(debug) System.out.println("\t Regla 12d");
+						RESULT = sif;
 					:}
-				| sent_call
+				| sent_call:sca
 					{:
 						if(debug) System.out.println("\t Regla 12e");
+						RESULT = sca;
 					:}
-				| sent_return
+				| sent_return:srt
 					{:
 						if(debug) System.out.println("\t Regla 12e");
+						RESULT = srt;
 					:}
 				;
 
@@ -348,10 +368,12 @@ decl ::=  ID sent_asig: senta
 sent_asig ::= 	ASIG sent_asig:de	
 					{: 
 						if(debug) System.out.println("\t Regla 16");
+						RESULT = de;
 					:}
 				| ASIG exp:ex
 					{: 
 						if(debug) System.out.println("\t Regla 16b");
+						RESULT = ex;
 					:}
 				| ASIG AMP ID
 					{: 
@@ -361,6 +383,7 @@ sent_asig ::= 	ASIG sent_asig:de
 				|/* vacio */ 	
 					{:
 						if(debug) System.out.println("\t Regla 16c");
+						RESULT = null;
 					:}
 				;	  
 
@@ -368,10 +391,12 @@ sent_asig ::= 	ASIG sent_asig:de
 sentencia_exp ::= exp:ex PYC
 					{: 
 						if(debug) System.out.println("\t Regla 17");
+						RESULT = ex;
 					:}
 				| PYC
 					{:
 						if(debug) System.out.println("\t Regla 17b");
+						RESULT = null;
 					:}
 				;
 
@@ -379,10 +404,12 @@ sentencia_exp ::= exp:ex PYC
 exp ::=  exp:ex OR exp_l:el
 					{:
 						if(debug) System.out.println("\t Regla 18b");
+						RESULT = new NodoOperacion(ex, tipoOp.or, el);
 					:}
 				| exp_l:el
 					{:
 						if(debug) System.out.println("\t Regla 18c");
+						RESULT = el;
 					:}
 				;
 
@@ -390,138 +417,150 @@ exp ::=  exp:ex OR exp_l:el
 exp_l ::= exp_l:el AND simple_exp:se
 					{: 
 						if(debug) System.out.println("\t Regla 19");
+						RESULT = new NodoOperacion(el, tipoOp.and, se);
 					:}
 				| simple_exp:se
 					{:
 						if(debug) System.out.println("\t Regla 19b");
+						RESULT = se;
 					:}
 				;
 
 /* REGLA 20 */
-simple_exp ::= simple_exp:ea relop:rl exp_a:ea2
+simple_exp ::= simple_exp:ea MENIG exp_a:ea2
 					{: 
 						if(debug) System.out.println("\t Regla 20");
+						RESULT = new NodoOperacion(ea, tipoOp.menor_igual, ea2);
+					:}
+				| simple_exp:ea MENOR exp_a:ea2
+					{:
+						if(debug) System.out.println("\t Regla 20b");
+						RESULT = new NodoOperacion(ea, tipoOp.menor, ea2);
+					:}
+				| simple_exp:ea MAYOR exp_a:ea2 
+					{:
+						if(debug) System.out.println("\t Regla 20c");
+						RESULT = new NodoOperacion(ea, tipoOp.mayor, ea2);
+					:}
+				| simple_exp:ea MAYIG exp_a:ea2  
+					{:
+						if(debug) System.out.println("\t Regla 20d");
+						RESULT = new NodoOperacion(ea, tipoOp.mayor_igual, ea2);
+					:}
+				| simple_exp:ea IGUAL exp_a:ea2   
+					{:
+						if(debug) System.out.println("\t Regla 20e");
+						RESULT = new NodoOperacion(ea, tipoOp.igual, ea2);
+					:}
+				| simple_exp:ea DIF exp_a:ea2 
+					{:
+						if(debug) System.out.println("\t Regla 20f");
+						RESULT = new NodoOperacion(ea, tipoOp.diferente, ea2);
 					:}
 				| exp_a:ea
 					{:
-						if(debug) System.out.println("\t Regla 20b");
+						if(debug) System.out.println("\t Regla 20g");
+						RESULT = ea;
 					:}
 				;
 
 /* REGLA 21 */
-exp_a ::= exp_a:ea adop:ad term:te
+exp_a ::= exp_a:ea MAS term:te
 					{: 
 						if(debug) System.out.println("\t Regla 21");
+						RESULT = new NodoOperacion(ea, tipoOp.mas, te);
+					:}
+		  		| exp_a:ea MENOS term:te 
+					{:
+						if(debug) System.out.println("\t Regla 21");
+						RESULT = new NodoOperacion(ea, tipoOp.menos, te);
 					:}
 				| term:te
 					{:
 						if(debug) System.out.println("\t Regla 21b");
-					:}
-				;
-
-/* REGLA 22 */
-adop ::= MAS
-					{: 
-						if(debug) System.out.println("\t Regla 22");
-
-					:}
-				| MENOS
-					{:
-						if(debug) System.out.println("\t Regla 22b");
+						RESULT = te;
 					:}
 				;
 
 /* REGLA 23 */
-term ::= term:te mulop:mu factor:fa
+term ::= term:te MULT:mu factor:fa
 					{: 
 						if(debug) System.out.println("\t Regla 23");
+						RESULT = new NodoOperacion(te, tipoOp.por, fa);
 					:}
+				| term:te DIV factor:fa
+					{:
+						if(debug) System.out.println("\t Regla 23b");
+						RESULT = new NodoOperacion(te, tipoOp.entre, fa);
+					:}
+				
 				| factor:fa
 					{:
 						if(debug) System.out.println("\t Regla 23b");
+						RESULT = fa;
 					:}
 				;
 
-/* REGLA 24 */
-mulop ::= MULT
-					{: 
-						if(debug) System.out.println("\t Regla 24");
-					:}
-				| DIV
-					{:
-						if(debug) System.out.println("\t Regla 24b");
-					:}
-				;
 
 /* REGLA 25 */
 factor ::= 		LPAREN exp:ex RPAREN
 					{: 
 						if(debug) System.out.println("\t Regla 25");
+						RESULT = ex;
 					:}
-				| ID
+				| ID:variable
 					{:
 						if(debug) System.out.println("\t Regla 25b");
+
+						if(variable != null) {
+							System.out.println("\t contruyendo nodoId para lexema:" + variable.toString());
+							RESULT = new NodoIdentificador(variable.toString());
+						}
 					:}
-				| NUM
+				| NUM: valor
 					{:
 						if(debug) System.out.println("\t Regla 25c");
+
+										 
+						System.out.println("Devolvi nodo numero entero");
+					
+						if (valor != null) {
+							RESULT = new NodoValor(Integer.valueOf(valor));
+						} else { 
+							RESULT = null;
+							System.out.println("\t ERROR en cup revisar el valor del numero");
+						}
+
 					:}
-				| factor_bool: factor_bool 
+				| TRUE
 					{:
 						if(debug) System.out.println("\t Regla 25d");
+						RESULT = new NodoValor(1, 1);
+					:}
+
+				| FALSE
+					{:
+						if(debug) System.out.println("\t Regla 25d");
+						RESULT = new NodoValor(0, 1);
 					:}
 				| sent_call:stcall 
 					{:
 						if(debug) System.out.println("\t Regla 25e");
+						RESULT = stcall;
 					:}
 				;
 
-/* REGLA 26 */
-relop ::= MENIG
-					{: 
-						if(debug) System.out.println("\t Regla 26");
-					:}
-				| MENOR
-					{:
-						if(debug) System.out.println("\t Regla 26b");
-					:}
-				| MAYOR
-					{:
-						if(debug) System.out.println("\t Regla 26c");
-					:}
-				| MAYIG
-					{:
-						if(debug) System.out.println("\t Regla 26d");
-					:}
-				| IGUAL
-					{:
-						if(debug) System.out.println("\t Regla 26e");
-					:}
-				| DIF
-					{:
-						if(debug) System.out.println("\t Regla 26f");
-					:}
-				;
-
-/* REGLA 27 */
-factor_bool ::= TRUE
-					{: 
-						if(debug) System.out.println("\t Regla 27");
-					:}
-				| FALSE
-					{:
-						if(debug) System.out.println("\t Regla 27b");
-					:}
-				;
 
 /* REGLA 28 */
 sent_io ::= sent_puts:sp
 					{: 
 						if(debug) System.out.println("\t Regla 28");
+						RESULT = sp;
 					:}
-				| sent_gets
+				| sent_gets: sge
 					{:
 						if(debug) System.out.println("\t Regla 28b");
+						RESULT = sge;
 					:}
 				;
 
@@ -529,14 +568,17 @@ sent_io ::= sent_puts:sp
 sent_iter ::= sent_for:sf
 					{: 
 						if(debug) System.out.println("\t Regla 29");
+						RESULT = sf;
 					:}
 				| sent_while:sw
 					{:
 						if(debug) System.out.println("\t Regla 29b");
+						RESULT = sw;
 					:}
-				| sent_dw:sd
+				| sent_dw:dw
 					{:
 						if(debug) System.out.println("\t Regla 29c");
+						RESULT = dw;
 					:}
 				;
 
@@ -544,28 +586,51 @@ sent_iter ::= sent_for:sf
 sent_if ::= IF LPAREN exp:ex RPAREN cuerpo:cu ELSE cuerpo:cu2
 					{: 
 						if(debug) System.out.println("\t Regla 30");
+						RESULT = new NodoIf(ex, cu, cu2);
 					:}
 				| IF LPAREN exp:ex RPAREN cuerpo:cu
 					{:
 						if(debug) System.out.println("\t Regla 30b");
+						RESULT = new NodoIf(ex, cu);
 					:}
 				;
 
 /* REGLA 31 */
-sent_call ::= ID LPAREN sent_args:sent_args RPAREN PYC
+sent_call ::= ID:nombre LPAREN sent_args:sent_args RPAREN PYC
 					{:
 						if(debug) System.out.println("\t Regla 31");
+						RESULT = new NodoCallFunc(nombre, sent_args);
 					:}
 			 	;
 
 /* REGLA 32 */
-sent_args ::= sent_args:sent_args COMA exp:ex
+sent_args ::=  exp:ex COMA sent_args:sent_args
 					{:
-						if(debug) System.out.println("\t Regla 32");
+						if(debug) System.out.println("\t Regla 32 argumentos");
+
+						NodoBase hijoActual = ex;
+						
+						if (hijoActual != null) {
+						
+							while(hijoActual.TieneHermano()){
+							
+								hijoActual = hijoActual.getHermanoDerecha();
+							
+							}
+							
+							hijoActual.setHermanoDerecha(sent_args);
+							RESULT = ex;
+						
+						} else {
+						
+							RESULT = sent_args;
+						
+						}
 					:}
 				| exp:ex
 					{:
 						if(debug) System.out.println("\t Regla 32b");
+						RESULT = ex;
 					:}
 				;
 
@@ -573,10 +638,12 @@ sent_args ::= sent_args:sent_args COMA exp:ex
 sent_return ::= RETURN PYC
 					{: 
 						if(debug) System.out.println("\t Regla 33");
+						RESULT = new NodoReturn();
 					:}
 				| RETURN exp:ex PYC
 					{:
 						if(debug) System.out.println("\t Regla 33b");
+						RESULT = new NodoReturn(ex);
 					:}
 				;
 
@@ -584,14 +651,16 @@ sent_return ::= RETURN PYC
 sent_puts ::=  PUTS LPAREN exp_a:ea RPAREN PYC
 					{:
 						if(debug) System.out.println("\t Regla 34");
+						RESULT = new NodoEscribir(ea);
 					:}
 				;
 
 
 /* REGLA 35 */
-sent_gets ::= GETS LPAREN ID RPAREN PYC
+sent_gets ::= GETS LPAREN ID:variable RPAREN PYC
 					{: 
 						if(debug) System.out.println("\t Regla 35");
+						RESULT = new NodoLeer(variable);
 					:}
 				;
 
@@ -599,20 +668,23 @@ sent_gets ::= GETS LPAREN ID RPAREN PYC
 sent_for ::= FOR LPAREN sent_decl:sd sentencia_exp:se decl:decl RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 36");
+						RESULT = new NodoFor(); // TODO COMPLETAR NODO
 					:}
 				;
 
 /* REGLA 37 */
-sent_while ::= WHILE LPAREN exp_l:el RPAREN cuerpo:cu
+sent_while ::= WHILE LPAREN exp_l:prueba RPAREN cuerpo:cuerpo
 					{: 
 						if(debug) System.out.println("\t Regla 37");
+						RESULT = new NodoWhile(prueba, cuerpo);
 					:}
 				;
 
 /* REGLA 38 */
-sent_dw ::= DO cuerpo:cu WHILE LPAREN exp_l:el RPAREN PYC
+sent_dw ::= DO cuerpo:cuerpo WHILE LPAREN exp_l:prueba RPAREN PYC
 					{: 
 						if(debug) System.out.println("\t Regla 38");
+						RESULT = new NodoDoWhile(cuerpo, prueba);
 					:}
 				;
 

@@ -7,6 +7,7 @@ public class Util {
 	//Imprimo en modo texto con sangrias el AST
 	public static void imprimirAST(NodoBase raiz){
 		  sangria+=2;
+		  System.out.println(raiz.TieneHermano());
 		  while (raiz != null) {
 		    printSpaces();
 		    if (raiz instanceof  NodoIf)
@@ -15,7 +16,7 @@ public class Util {
 		    	System.out.println("Programa");
 		    
 		    else if ( raiz instanceof NodoMain)
-		    	System.out.println("Programa");
+		    	System.out.println("Main");
 		    
 		    else if (raiz instanceof NodoCuerpo)
 		    	System.out.println("Cuerpo");
@@ -76,6 +77,7 @@ public class Util {
 		    	imprimirAST(((NodoOperacion)raiz).getOpDerecho());
 		    }
 		    raiz = raiz.getHermanoDerecha();
+		    System.out.println(raiz);
 		  }
 		  sangria-=2;
 		}
