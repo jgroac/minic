@@ -216,10 +216,23 @@ parametros ::= lista_parametros:lp
 lista_parametros ::= parametro:pa COMA lista_parametros:lp
 					{: 
 						if(debug) System.out.println("\t Regla 6");
+						NodoBase hijoActual = pa;
+					
+						if (hijoActual != null) {
+							while(hijoActual.TieneHermano()) {
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(lp);
+							RESULT = pa;
+						} else {
+							RESULT = pa;
+						}
+
 					:}
 				| parametro:pa
 					{: 
 						if(debug) System.out.println("\t Regla 6b");
+						RESULT = pa;
 					:}
 				;
 
@@ -358,7 +371,7 @@ decl ::=  ID sent_asig: senta
 				{: 
 						if(debug) System.out.println("\t Regla 15");
 				:}
-			| POINT ID sent_asig:senta 
+			| MULT ID sent_asig:senta 
 				{:
 					if(debug) System.out.println("\t Regla 15b");
 				:}
@@ -517,9 +530,13 @@ factor ::= 		LPAREN exp:ex RPAREN
 							RESULT = new NodoIdentificador(variable.toString());
 						}
 					:}
-				| NUM: valor
+				| MULT ID:variable 
 					{:
 						if(debug) System.out.println("\t Regla 25c");
+					:}
+				| NUM: valor
+					{:
+						if(debug) System.out.println("\t Regla 25d");
 
 										 
 						System.out.println("Devolvi nodo numero entero");
@@ -534,18 +551,18 @@ factor ::= 		LPAREN exp:ex RPAREN
 					:}
 				| TRUE
 					{:
-						if(debug) System.out.println("\t Regla 25d");
+						if(debug) System.out.println("\t Regla 25e");
 						RESULT = new NodoValor(1, 1);
 					:}
 
 				| FALSE
 					{:
-						if(debug) System.out.println("\t Regla 25d");
+						if(debug) System.out.println("\t Regla 25f");
 						RESULT = new NodoValor(0, 1);
 					:}
 				| sent_call:stcall 
 					{:
-						if(debug) System.out.println("\t Regla 25e");
+						if(debug) System.out.println("\t Regla 25g");
 						RESULT = stcall;
 					:}
 				;
@@ -596,7 +613,7 @@ sent_if ::= IF LPAREN exp:ex RPAREN cuerpo:cu ELSE cuerpo:cu2
 				;
 
 /* REGLA 31 */
-sent_call ::= ID:nombre LPAREN sent_args:sent_args RPAREN PYC
+sent_call ::= ID:nombre LPAREN sent_args:sent_args RPAREN
 					{:
 						if(debug) System.out.println("\t Regla 31");
 						RESULT = new NodoCallFunc(nombre, sent_args);
