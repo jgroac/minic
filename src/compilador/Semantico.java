@@ -22,11 +22,7 @@ public class Semantico {
 					recorrido(((NodoPrograma)raiz).getListaFunciones());
 					recorrido(((NodoPrograma)raiz).getMain());
 				}else{
-					recorrido(((NodoPrograma)raiz).getMain());
-					if(((NodoPrograma)raiz).hasListaFunciones()){
-						System.out.println("Error: Toda Función debe ser declarada antes del main");
-						break;
-					}					
+					recorrido(((NodoPrograma)raiz).getMain());			
 				}
 			}//NodoPrograma		
 			
