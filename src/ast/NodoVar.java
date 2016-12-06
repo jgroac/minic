@@ -4,10 +4,18 @@ public class NodoVar extends NodoBase {
 
 	private String tipo;
 	private String identificador;
+	private boolean pointer;
 	
 	public NodoVar(String tipo, String identificador) {
 		this.tipo = tipo;
 		this.identificador = identificador;
+		this.pointer = false;
+	}
+	
+	public NodoVar(String tipo, String identificador, boolean pointer) {
+		this.tipo = tipo;
+		this.identificador = identificador;
+		this.pointer = pointer;
 	}
 	
 	public String getTipo() {

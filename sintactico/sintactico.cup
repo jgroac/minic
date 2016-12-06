@@ -18,7 +18,7 @@ Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols
 		/*if (args.length==0) 
 			parser_obj=new parser(new Scanner(System.in,sf),sf);
 		else*/
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("prueba.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/sintactico/ejemplo.mc"),sf),sf);
 
 		parser_obj.parse();
 		
@@ -59,7 +59,6 @@ terminal VOID;
 terminal RETURN;
 terminal BOOL;
 terminal INT;
-terminal POINT;
 terminal PUTS;
 terminal GETS;
 terminal FOR;
@@ -109,17 +108,12 @@ non terminal NodoBase sentencia;
 non terminal NodoBase sent_decl;
 non terminal NodoBase lista_decl;
 non terminal NodoBase decl;
-non terminal NodoBase sent_asig;
 non terminal NodoBase sentencia_exp;
 non terminal NodoBase exp;
 non terminal NodoBase exp_a;
-non terminal NodoBase adop;
 non terminal NodoBase term;
-non terminal NodoBase mulop;
 non terminal NodoBase factor;
 non terminal NodoBase exp_l;
-non terminal NodoBase relop;
-non terminal NodoBase factor_bool;
 non terminal NodoBase sent_io;
 non terminal NodoBase sent_iter;
 non terminal NodoBase sent_if;
@@ -166,8 +160,11 @@ lista_funciones ::= lista_funciones:lf funcion:fu
 							while(hijoActual.TieneHermano()) {
 								hijoActual = hijoActual.getHermanoDerecha();
 							}
-							hijoActual.setHermanoDerecha(lf);
-							RESULT = fu;
+							// Si existen hermanos ahora
+							// Hijo actual = LF, debido a que la recursividad es por la izquierda
+							hijoActual = lf;
+							hijoActual.setHermanoDerecha(fu);
+							RESULT = lf;
 						} else {
 							RESULT = lf;
 						}
@@ -357,17 +354,17 @@ sent_decl ::= id_tipo:it lista_decl:ld PYC
 				;	
 
 /* REGLA 14 */
-lista_decl ::= lista_decl:ld COMA decl:de 			
+lista_decl ::=  decl:de  COMA lista_decl:ld 			
 					{: 
 						if(debug) System.out.println("\t Regla 14");
-						NodoBase hijoActual = ld;
+						NodoBase hijoActual = de;
 					
 						if (hijoActual != null) {
 							while(hijoActual.TieneHermano()) {
 								hijoActual = hijoActual.getHermanoDerecha();
 							}
-							hijoActual.setHermanoDerecha(de);
-							RESULT = ld;
+							hijoActual.setHermanoDerecha(ld);
+							RESULT = de;
 						} else {
 							RESULT = de;
 						}	
@@ -380,45 +377,28 @@ lista_decl ::= lista_decl:ld COMA decl:de
 				;	
 
 /* REGLA 15 */
-decl ::=  ID:ident  sent_asig: senta
+decl ::=  ID:ident  ASIG exp:ex
 				{: 
 					if(debug) System.out.println("\t Regla 15");
-					var_identificador = ident;
-					RESULT =  senta;
+					RESULT = new NodoAsignacion(ident, ex);
 				:}
-			| MULT ID:ident sent_asig:senta 
+			| MULT ID:ident ASIG exp:ex
 				{:
-					if(debug) System.out.println("\t Regla 15b");
-					var_identificador = ident;
-					puntero = true;
-					RESULT = senta;
+					if(debug) System.out.println("\t Regla 15d");
+					RESULT = new NodoAsignacion(ident, ex, true);
 
 				:}
-				;
-
-/* REGLA 16 */
-sent_asig ::= 	ASIG sent_asig:de	
-					{: 
-						if(debug) System.out.println("\t Regla 16");
-						RESULT = new NodoAsignacion(var_identificador, de);
-					:}
-				| ASIG exp:ex
-					{: 
-						if(debug) System.out.println("\t Regla 16b");
-						RESULT = new NodoAsignacion(var_identificador, ex);
-					:}
-				| ASIG AMP ID:variable
-					{: 
-						if(debug) System.out.println("\t Regla 16c");
-						RESULT = new NodoAsignacion(var_identificador, new NodoVar(variable, ""), true);
-					:}
-
-				|/* vacio */ 	
-					{:
-						if(debug) System.out.println("\t Regla 16c");
-						RESULT = new NodoAsignacion(var_identificador, null);
-					:}
-				;	  
+			| ID:ident /* Vacio */
+				{:	
+					if(debug) System.out.println("\t Regla 15e");
+					RESULT = new NodoVar(tipo, ident.toString());
+				:}
+			| MULT ID:ident 
+				{:
+					if(debug) System.out.println("\t Regla 15e");
+					RESULT = new NodoVar(tipo, ident.toString(), true);
+				:}
+			;
 
 /* REGLA 17 */
 sentencia_exp ::= exp:ex PYC
@@ -555,9 +535,14 @@ factor ::= 		LPAREN exp:ex RPAREN
 						if(debug) System.out.println("\t Regla 25c");
 						RESULT = new NodoIdentificador(variable, null, true);
 					:}
-				| NUM: valor
+				| AMP ID:variable 
 					{:
 						if(debug) System.out.println("\t Regla 25d");
+						RESULT = new NodoIdentificador(variable, null, true);
+					:}
+				| NUM: valor
+					{:
+						if(debug) System.out.println("\t Regla 25e");
 
 										 
 						System.out.println("Devolvi nodo numero entero");
