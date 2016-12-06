@@ -4,6 +4,7 @@ public class RegistroSimbolo {
 	private String identificador;
 	private int NumLinea;
 	private int DireccionMemoria;
+	private String ambito;
 	
 	public RegistroSimbolo(String identificador, int numLinea,
 			int direccionMemoria) {
@@ -12,6 +13,15 @@ public class RegistroSimbolo {
 		NumLinea = numLinea;
 		DireccionMemoria = direccionMemoria;
 	}
+	
+	public RegistroSimbolo(String identificador, int numLinea,
+			int direccionMemoria, String ambito) {
+		super();
+		this.identificador = identificador;
+		NumLinea = numLinea;
+		DireccionMemoria = direccionMemoria;
+		this.ambito = ambito;
+	}
 
 	public String getIdentificador() {
 		return identificador;
@@ -19,6 +29,10 @@ public class RegistroSimbolo {
 
 	public int getNumLinea() {
 		return NumLinea;
+	}
+	
+	public String getAmbito() { 
+		return this.ambito;
 	}
 
 	public int getDireccionMemoria() {

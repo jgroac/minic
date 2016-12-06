@@ -1,5 +1,5 @@
 int suma(int num1, int num2){
-int sum;
+int sum,b;
 /* Argumentos usados aqui*/
 sum = num1+num2;
 /* Retorno
