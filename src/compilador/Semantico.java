@@ -32,6 +32,13 @@ public class Semantico {
 			else if(raiz instanceof NodoIf){
 				comprobarIf(raiz);
 			}
+			else if(raiz instanceof NodoWhile){
+				comprobarWhile(raiz);
+			}
+			else if(raiz instanceof NodoDoWhile){
+				comprobarDoWhile(raiz);
+			}
+				
 		}//Fin While
 	}//Fin Recorrido
 
@@ -40,11 +47,28 @@ public class Semantico {
 		if(verificarTipo(((NodoIf)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
 		}
-		
 		recorrido(((NodoIf)nodo).getCuerpoIf());
 		if(((NodoIf)nodo).hasElse()){
 			recorrido(((NodoIf)nodo).getCuerpoElse());
 		}
+	}
+	
+	private void comprobarWhile(NodoBase nodo){
+		recorrido(((NodoWhile)nodo).getPrueba());
+		if(verificarTipo(((NodoWhile)nodo).getPrueba()) != "Boolean"){
+			System.out.println("La operación no devuelve un valor booleano");
+		}
+		recorrido(((NodoWhile)nodo).getCuerpo());
+	}
+	
+	private void comprobarDoWhile(NodoBase nodo){
+		recorrido(((NodoDoWhile)nodo).getCuerpo());
+		recorrido(((NodoDoWhile)nodo).getPrueba());
+		
+		if(verificarTipo(((NodoDoWhile)nodo).getPrueba()) != "Boolean"){
+			System.out.println("La operación no devuelve un valor booleano");
+		}
+		
 	}
 	
 	private String verificarTipo (NodoBase nodo) {
