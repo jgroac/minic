@@ -1,4 +1,4 @@
-package Tiny;
+package compilador;
 
 import java_cup.runtime.*;
 //import otros.*;
@@ -66,9 +66,6 @@ espacio		= [ \t]+
 "int"           {	if(debug) System.out.println("token INT");
 			return sf.newSymbol("INT",sym.INT);
 			}
-"^"             {	if(debug) System.out.println("token POINT");
-			return sf.newSymbol("POINT",sym.POINT);
-			}
 "puts"          {	if(debug) System.out.println("token PUTS");
 			return sf.newSymbol("PUTS",sym.PUTS);
 			}
@@ -117,10 +114,10 @@ espacio		= [ \t]+
 ">="            {	if(debug) System.out.println("token MAYIG");
 			return sf.newSymbol("MAYIG",sym.MAYIG);
 			}
-"!="            {	if(debug) System.out.println("token IGUAL");
+"=="            {	if(debug) System.out.println("token IGUAL");
 			return sf.newSymbol("IGUAL",sym.IGUAL);
 			}
-"<>"            {	if(debug) System.out.println("token DIF");
+"!="            {	if(debug) System.out.println("token DIF");
 			return sf.newSymbol("DIF",sym.DIF);
 			}
 "&&"            {	if(debug) System.out.println("token AND");
