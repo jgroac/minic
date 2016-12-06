@@ -7,22 +7,59 @@ public class Util {
 	//Imprimo en modo texto con sangrias el AST
 	public static void imprimirAST(NodoBase raiz){
 		  sangria+=2;
-		  System.out.println(raiz.TieneHermano());
 		  while (raiz != null) {
 		    printSpaces();
-		    if (raiz instanceof  NodoIf)
-		    	System.out.println("If");
-		    else if ( raiz instanceof NodoPrograma)
-		    	System.out.println("Programa");
+		    // Nodo Programa
+		    if(raiz instanceof NodoPrograma) {
+		    	System.out.println("NodoPrograma");
+		    	NodoFuncion funciones = (NodoFuncion) ((NodoPrograma)raiz).getListaFunciones();
+		    	NodoMain  mainf = (NodoMain) ((NodoPrograma)raiz).getMain();
+		    	imprimirAST(funciones);
+		    	imprimirAST(mainf);
+		    	break;
+		    }
 		    
-		    else if ( raiz instanceof NodoMain)
+		    // Nodo Funcion
+		    else if (raiz instanceof NodoFuncion) {
+		    	NodoFuncion  nodofun = ((NodoFuncion)(raiz));
+		    	System.out.println("decl_fun:" + nodofun.getNombreFuncion());
+		    	imprimirAST(nodofun.getArgs());
+		    	imprimirAST(nodofun.getCuerpoFuncion());
+		    }
+		    
+		    // Nodo Main
+		    else if(raiz instanceof NodoMain) {
 		    	System.out.println("Main");
+		    	imprimirAST((NodoBase) ((NodoMain)raiz).getCuerpo());
+		    }
 		    
-		    else if (raiz instanceof NodoCuerpo)
+		    // Nodo Cuerpo
+		    else if (raiz instanceof NodoCuerpo) {
 		    	System.out.println("Cuerpo");
-		   
-		    else if (raiz instanceof NodoReturn)
+		    	imprimirAST((NodoBase) ((NodoCuerpo)raiz).getSentencias());
+		    }
+		    
+		    // Nodo Variables
+		    else if(raiz instanceof NodoVar) {
+		    	NodoVar nodovar = ((NodoVar)raiz);
+		    	System.out.print("Var tipo:" + nodovar.getTipo() + " id:" + nodovar.getIdentificador());
+		    	
+		    }
+		    
+		    // Nodo llamada a funcion
+		    else if(raiz instanceof NodoCallFunc) {
+		    	NodoCallFunc callfun = ((NodoCallFunc)raiz);
+		    	System.out.println("Llamada : " + callfun.getNombreFuncion());
+		    	imprimirAST(callfun.getArgs());
+		    }
+		    	
+
+		   // Nodo Return
+		    else if (raiz instanceof NodoReturn) {
 		    	System.out.println("return");
+		    	imprimirAST(((NodoReturn)raiz).getExp());
+		    }
+		    	
 		    
 		    else if (raiz instanceof  NodoRepeat)
 		    	System.out.println("Repeat");
@@ -48,11 +85,11 @@ public class Util {
 		    	System.out.println("**Prueba IF**");
 		    	imprimirAST(((NodoIf)raiz).getPrueba());
 		    	printSpaces();
-		    	System.out.println("**Then IF**");
+		    	System.out.println("**Cuerpo IF**");
 		    	imprimirAST(((NodoIf)raiz).getCuerpoIf());
 		    	if(((NodoIf)raiz).hasElse()){
 		    		printSpaces();
-		    		System.out.println("**Else IF**");
+		    		System.out.println("**Cuerpo Else**");
 		    		imprimirAST(((NodoIf)raiz).getCuerpoElse());
 		    	}
 		    }
@@ -77,7 +114,6 @@ public class Util {
 		    	imprimirAST(((NodoOperacion)raiz).getOpDerecho());
 		    }
 		    raiz = raiz.getHermanoDerecha();
-		    System.out.println(raiz);
 		  }
 		  sangria-=2;
 		}

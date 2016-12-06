@@ -4,6 +4,9 @@ int sum;
 sum = num1+num2;
 /* Retorno
 El valor */
+if( 1 > 2){
+sum = 1;
+}
 return sum;
 }
 
