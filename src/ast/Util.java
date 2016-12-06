@@ -59,10 +59,35 @@ public class Util {
 		    	System.out.println("return");
 		    	imprimirAST(((NodoReturn)raiz).getExp());
 		    }
-		    	
 		    
-		    else if (raiz instanceof  NodoRepeat)
-		    	System.out.println("Repeat");
+		    // Nodo Dowhile
+		    else if (raiz instanceof NodoDoWhile) {
+		    	System.out.println("DoWhile");
+		    	printSpaces();
+		    	System.out.println(" -- Prueba -- ");
+		    	imprimirAST(((NodoDoWhile)raiz).getPrueba());
+		    	System.out.println("-- Cuerpo --");
+		    	imprimirAST(((NodoDoWhile)raiz).getCuerpo());
+		    }
+		    
+		 // Nodo For
+		    else if (raiz instanceof NodoFor) {
+		    	System.out.println("NodoFor");
+		    	printSpaces();
+		    	System.out.println(" -- Exp1 -- ");
+		    	imprimirAST(((NodoFor)raiz).getListaDeclaracion());
+		    	printSpaces();
+		    	System.out.println(" -- Exp2 -- ");
+		    	imprimirAST(((NodoFor)raiz).getExpresion());
+		    	printSpaces();
+		    	System.out.println(" -- Exp3 -- ");
+		    	imprimirAST(((NodoFor)raiz).getDeclaracion());
+		    	System.out.println("-- Cuerpo --");
+		    	imprimirAST(((NodoFor)raiz).getCuerpo());
+		    }
+		    
+		    
+		    	
 		    
 		    else if (raiz instanceof  NodoAsignacion)
 		    	System.out.println("Asignacion a: "+((NodoAsignacion)raiz).getIdentificador());
@@ -93,13 +118,14 @@ public class Util {
 		    		imprimirAST(((NodoIf)raiz).getCuerpoElse());
 		    	}
 		    }
-		    else if (raiz instanceof  NodoRepeat){
+		    else if (raiz instanceof  NodoWhile){
 		    	printSpaces();
-		    	System.out.println("**Cuerpo REPEAT**");
-		    	imprimirAST(((NodoRepeat)raiz).getCuerpo());
+		    	System.out.println("**Prueba While**");
+		    	imprimirAST(((NodoWhile)raiz).getPrueba());
+		    	System.out.println("**Cuerpo While**");
+		    	imprimirAST(((NodoWhile)raiz).getCuerpo());
 		    	printSpaces();
-		    	System.out.println("**Prueba REPEAT**");
-		    	imprimirAST(((NodoRepeat)raiz).getPrueba());
+
 		    }
 		    else if (raiz instanceof  NodoAsignacion)
 		    	imprimirAST(((NodoAsignacion)raiz).getExpresion());

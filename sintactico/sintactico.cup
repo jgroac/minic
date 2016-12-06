@@ -247,11 +247,13 @@ parametro ::= id_tipo:it ID:variable
 id_tipo ::= INT 
 					{: 
 						if(debug) System.out.println("\t Regla 8");
+						tipo = "Integer";
 						RESULT = "Integer";
 					:}	
 				| BOOL
 					{: 
 						if(debug) System.out.println("\t Regla 8b");
+						tipo = "Boolean";
 						RESULT = "Boolean";
 					:}
 				;
@@ -687,7 +689,7 @@ sent_gets ::= GETS LPAREN ID:variable RPAREN PYC
 sent_for ::= FOR LPAREN sent_decl:sd sentencia_exp:se decl:decl RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 36");
-						RESULT = new NodoFor(sd, se, decl); // TODO COMPLETAR NODO
+						RESULT = new NodoFor(sd, se, decl, cu); // TODO COMPLETAR NODO
 					:}
 				;
 
