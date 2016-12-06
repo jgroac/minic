@@ -42,7 +42,9 @@ action code {:
 	private boolean debug=true;
 	private NodoBase ast=null;
 	private int lineanum=0;
-	
+	String tipo;
+	String var_identificador;
+	boolean puntero = false;
 	//Debe ser llamada solo despues de un parse(), en caso contrario retornara null siempre;
 	public NodoBase getASTroot(){
 		return ast;
@@ -158,7 +160,7 @@ programa 	::= lista_funciones:lf mainf:mf
 lista_funciones ::= lista_funciones:lf funcion:fu 
 					{: 
 						if(debug) System.out.println("\t Regla 2");
-						NodoBase hijoActual = lf;
+						NodoBase hijoActual = fu;
 					
 						if (hijoActual != null) {
 							while(hijoActual.TieneHermano()) {
@@ -167,7 +169,7 @@ lista_funciones ::= lista_funciones:lf funcion:fu
 							hijoActual.setHermanoDerecha(lf);
 							RESULT = fu;
 						} else {
-							RESULT = fu;
+							RESULT = lf;
 						}
 					:}
 				| funcion:fuc
@@ -237,10 +239,10 @@ lista_parametros ::= parametro:pa COMA lista_parametros:lp
 				;
 
 /* REGLA 7 */			
-parametro ::= id_tipo:it ID
+parametro ::= id_tipo:it ID:variable
 					{: 
 						if(debug) System.out.println("\t Regla 7");
-
+						RESULT = new NodoVar(it, variable);
 					:}
 				;	
  
@@ -279,7 +281,7 @@ tipo_f ::= INT
 cuerpo ::= LLI lista_sentencias:ls LLD				
 					{: 
 						if(debug) System.out.println("\t Regla 10");
-						RESULT = ls;
+						RESULT = new NodoCuerpo(ls);
 					:}
 				;	
 
@@ -344,12 +346,13 @@ sentencia ::= sent_decl:sd
 sent_decl ::= id_tipo:it lista_decl:ld PYC 			
 					{: 
 						if(debug) System.out.println("\t Regla 13");
-
+						tipo = it;
+						RESULT = ld;
 					:}
 				| lista_decl:ld PYC	
 					{: 
 						if(debug) System.out.println("\t Regla 13b");
-
+						RESULT = ld;
 					:}
 				;	
 
@@ -357,23 +360,39 @@ sent_decl ::= id_tipo:it lista_decl:ld PYC
 lista_decl ::= lista_decl:ld COMA decl:de 			
 					{: 
 						if(debug) System.out.println("\t Regla 14");
-
+						NodoBase hijoActual = ld;
+					
+						if (hijoActual != null) {
+							while(hijoActual.TieneHermano()) {
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(de);
+							RESULT = ld;
+						} else {
+							RESULT = de;
+						}	
 					:}
 				| decl:de	
 					{: 
 						if(debug) System.out.println("\t Regla 14b");
-
+						RESULT = de;
 					:}
 				;	
 
 /* REGLA 15 */
-decl ::=  ID sent_asig: senta
+decl ::=  ID:ident  sent_asig: senta
 				{: 
-						if(debug) System.out.println("\t Regla 15");
+					if(debug) System.out.println("\t Regla 15");
+					var_identificador = ident;
+					RESULT =  senta;
 				:}
-			| MULT ID sent_asig:senta 
+			| MULT ID:ident sent_asig:senta 
 				{:
 					if(debug) System.out.println("\t Regla 15b");
+					var_identificador = ident;
+					puntero = true;
+					RESULT = senta;
+
 				:}
 				;
 
@@ -381,22 +400,23 @@ decl ::=  ID sent_asig: senta
 sent_asig ::= 	ASIG sent_asig:de	
 					{: 
 						if(debug) System.out.println("\t Regla 16");
-						RESULT = de;
+						RESULT = new NodoAsignacion(var_identificador, de);
 					:}
 				| ASIG exp:ex
 					{: 
 						if(debug) System.out.println("\t Regla 16b");
-						RESULT = ex;
+						RESULT = new NodoAsignacion(var_identificador, ex);
 					:}
-				| ASIG AMP ID
+				| ASIG AMP ID:variable
 					{: 
 						if(debug) System.out.println("\t Regla 16c");
+						RESULT = new NodoAsignacion(var_identificador, new NodoVar(variable, ""), true);
 					:}
 
 				|/* vacio */ 	
 					{:
 						if(debug) System.out.println("\t Regla 16c");
-						RESULT = null;
+						RESULT = new NodoAsignacion(var_identificador, null);
 					:}
 				;	  
 
@@ -533,6 +553,7 @@ factor ::= 		LPAREN exp:ex RPAREN
 				| MULT ID:variable 
 					{:
 						if(debug) System.out.println("\t Regla 25c");
+						RESULT = new NodoIdentificador(variable, null, true);
 					:}
 				| NUM: valor
 					{:
@@ -541,12 +562,8 @@ factor ::= 		LPAREN exp:ex RPAREN
 										 
 						System.out.println("Devolvi nodo numero entero");
 					
-						if (valor != null) {
-							RESULT = new NodoValor(Integer.valueOf(valor));
-						} else { 
-							RESULT = null;
-							System.out.println("\t ERROR en cup revisar el valor del numero");
-						}
+						
+						RESULT = new NodoValor(Integer.valueOf(valor));
 
 					:}
 				| TRUE
@@ -685,7 +702,7 @@ sent_gets ::= GETS LPAREN ID:variable RPAREN PYC
 sent_for ::= FOR LPAREN sent_decl:sd sentencia_exp:se decl:decl RPAREN cuerpo:cu
 					{: 
 						if(debug) System.out.println("\t Regla 36");
-						RESULT = new NodoFor(); // TODO COMPLETAR NODO
+						RESULT = new NodoFor(sd, se, decl); // TODO COMPLETAR NODO
 					:}
 				;
 

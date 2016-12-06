@@ -8,8 +8,10 @@ int b (int c) {
 
 
 void main(){
-  if( 1 > 0 ) {
+  if( 1 ) {
      puts(2); 
+  } else {
+    int b = 3;
   }
  
   return 0; 
