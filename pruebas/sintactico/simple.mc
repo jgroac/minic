@@ -1,7 +1,7 @@
 void main(){
 	
 	int a;
-	llamado();
+	a = 2 + b;
 
 }
 

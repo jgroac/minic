@@ -54,13 +54,14 @@ public class Semantico {
 			}
 			
 			else if(raiz instanceof NodoAsignacion){
-				comprobarAsignacion(raiz);
+				this.anyError = !comprobarAsignacion(raiz);
 			}
 			
 			else if(raiz instanceof NodoCallFunc){
 				NodoCallFunc fun = (NodoCallFunc)raiz;
 				if(this.tablaSimbolos.BuscarFuncion(fun.getNombreFuncion()) == null){
 					System.out.println("La funcion " + fun.getNombreFuncion()+ " no de encuentra definida");
+					this.anyError = true;
 					// Asignar error al semantico
 				}
 			}
@@ -70,9 +71,9 @@ public class Semantico {
 	}//Fin Recorrido
 
 	private void comprobarIf(NodoBase nodo){
-		System.out.println("Entra");
 		if(comprobarTipoOperacion(((NodoIf)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
+			this.anyError = true;
 		}
 		recorrido(((NodoIf)nodo).getCuerpoIf());
 		if(((NodoIf)nodo).hasElse()){
@@ -84,6 +85,7 @@ public class Semantico {
 		recorrido(((NodoWhile)nodo).getPrueba());
 		if(comprobarTipoOperacion(((NodoWhile)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
+			this.anyError = true;
 		}
 		recorrido(((NodoWhile)nodo).getCuerpo());
 	}
@@ -94,6 +96,7 @@ public class Semantico {
 		
 		if(comprobarTipoOperacion(((NodoDoWhile)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
+			this.anyError = true;
 		}	
 	}
 	
@@ -105,7 +108,7 @@ public class Semantico {
 		/* si la variable existe */
 		if(verificarExistencia(identificador, ultimoAmbito)){
 			if(nodoasig.getExpresion() instanceof NodoOperacion) {
-				if (comprobarTipoOperacion(nodo) == "Error") {
+				if (comprobarTipoOperacion(nodoasig.getExpresion()) == "Error") {
 					System.out.println("Los tipos de la operacion son diferentes");
 					return false;
 				} else {
@@ -143,7 +146,7 @@ public class Semantico {
 			}
 			
 			else if(nodoasig.getExpresion() instanceof NodoValor) {
-				String tipo = "Integuer";
+				String tipo = "Integer";
 				if(((NodoValor)nodoasig.getExpresion()).getTipo() == 1) tipo = "Boolean";
 				
 				
@@ -209,14 +212,15 @@ public class Semantico {
 			}
 		}
 		
-		/*else if (nodo instanceof NodoIdentificador){
+		else if (nodo instanceof NodoIdentificador){
 			String nombre = ((NodoIdentificador)nodo).getNombre();
-			if(verificarExistencia(nombre)){
-				String tipo = this.tablaSimbolos.getTipo(nombre);
+			if(verificarExistencia(nombre,ultimoAmbito)){
+				String tipo = this.tablaSimbolos.BuscarSimbolo(nombre, ultimoAmbito).getTipo();
 				return tipo;
 			}
+			System.out.println("Error la variable " + nombre + " no esta definida");
 			return "Error";
-		}*/
+		}
 		
 		else if (nodo instanceof NodoValor) {
 			
