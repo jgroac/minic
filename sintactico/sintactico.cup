@@ -329,7 +329,7 @@ sentencia ::= sent_decl:sd
 						if(debug) System.out.println("\t Regla 12d");
 						RESULT = sif;
 					:}
-				| sent_call:sca
+				| sent_call:sca PYC
 					{:
 						if(debug) System.out.println("\t Regla 12e");
 						RESULT = sca;

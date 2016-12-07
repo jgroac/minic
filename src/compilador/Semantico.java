@@ -57,7 +57,12 @@ public class Semantico {
 				comprobarAsignacion(raiz);
 			}
 			
-			else if(raiz instanceof NodoCallFunc){	
+			else if(raiz instanceof NodoCallFunc){
+				NodoCallFunc fun = (NodoCallFunc)raiz;
+				if(this.tablaSimbolos.BuscarFuncion(fun.getNombreFuncion()) == null){
+					System.out.println("La funcion " + fun.getNombreFuncion()+ " no de encuentra definida");
+					// Asignar error al semantico
+				}
 			}
 			
 			raiz = raiz.getHermanoDerecha();
