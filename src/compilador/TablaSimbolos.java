@@ -24,7 +24,7 @@ import ast.NodoFor;
 
 public class TablaSimbolos {
 	private HashMap <String, HashMap<String, RegistroSimbolo>> tabla;
-	private HashMap <String, Integer> tablaFunciones;
+	private HashMap <String, String> tablaFunciones;
 	
 	/* Argumentos que recibe una funcion */
 	public ArrayList<String> listaArgumentos;
@@ -42,7 +42,7 @@ public class TablaSimbolos {
 		super();
 		tabla = new HashMap<String, HashMap<String, RegistroSimbolo>>();
 		direccion=0;
-		tablaFunciones = new HashMap <String, Integer>();
+		tablaFunciones = new HashMap <String, String>();
 		tablaDeArgumentos = new HashMap <String, ArrayList<String>>();
 		tablaTipo = new HashMap<String,String>();
 		direccion=0;
@@ -64,7 +64,7 @@ public class TablaSimbolos {
 		    		ultimoAmbito = nombreFuncion;
 		    		tablaTipo.put(ultimoAmbito, func.getTipoFuncion());
 		    		tabla.put(ultimoAmbito, new HashMap<String, RegistroSimbolo>());
-		    		
+		    		tablaFunciones.put(nombreFuncion, func.getTipoFuncion());
 		    		if(func.getArgs() != null) {
 		    			listaArgumentos = new ArrayList<String>();
 		    			cargarAgumentos(func.getArgs());
@@ -171,6 +171,14 @@ public class TablaSimbolos {
 		HashMap<String, RegistroSimbolo> tablaAmbito = tabla.get(ambito);
 		RegistroSimbolo simbolo=(RegistroSimbolo) tablaAmbito.get(identificador);
 		return simbolo;
+	}
+	
+	public RegistroSimbolo BuscarFuncion(String identificador){
+		if(tablaFunciones.containsKey(identificador)){
+			String tipo = tablaFunciones.get(identificador);
+			return new RegistroSimbolo(identificador, tipo, 0, 0, "Programa");
+		}
+		return null;
 	}
 	
 	public void ImprimirClaves(){

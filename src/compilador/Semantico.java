@@ -54,9 +54,7 @@ public class Semantico {
 			}
 			
 			else if(raiz instanceof NodoAsignacion){
-				if(!comprobarAsignacion(raiz)){
-					System.out.println("Variable no declarada");
-				}
+				comprobarAsignacion(raiz);
 			}
 			
 			else if(raiz instanceof NodoCallFunc){	
@@ -68,7 +66,7 @@ public class Semantico {
 
 	private void comprobarIf(NodoBase nodo){
 		System.out.println("Entra");
-		if(verificarTipo(((NodoIf)nodo).getPrueba()) != "Boolean"){
+		if(comprobarTipoOperacion(((NodoIf)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
 		}
 		recorrido(((NodoIf)nodo).getCuerpoIf());
@@ -79,7 +77,7 @@ public class Semantico {
 	
 	private void comprobarWhile(NodoBase nodo){
 		recorrido(((NodoWhile)nodo).getPrueba());
-		if(verificarTipo(((NodoWhile)nodo).getPrueba()) != "Boolean"){
+		if(comprobarTipoOperacion(((NodoWhile)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
 		}
 		recorrido(((NodoWhile)nodo).getCuerpo());
@@ -89,28 +87,82 @@ public class Semantico {
 		recorrido(((NodoDoWhile)nodo).getCuerpo());
 		recorrido(((NodoDoWhile)nodo).getPrueba());
 		
-		if(verificarTipo(((NodoDoWhile)nodo).getPrueba()) != "Boolean"){
+		if(comprobarTipoOperacion(((NodoDoWhile)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
 		}	
 	}
 	
 	private boolean comprobarAsignacion(NodoBase nodo){
+		NodoAsignacion nodoasig = (NodoAsignacion) nodo;
+		String identificador = nodoasig.getIdentificador();
+		RegistroSimbolo simboloasig = this.tablaSimbolos.BuscarSimbolo(identificador, ultimoAmbito);
 		
-		String identificador = ((NodoAsignacion)nodo).getIdentificador();
-		
-		/* Verifico si la variable existe*/
-		if(!verificarExistencia(identificador, ultimoAmbito)){
+		/* si la variable existe */
+		if(verificarExistencia(identificador, ultimoAmbito)){
+			if(nodoasig.getExpresion() instanceof NodoOperacion) {
+				if (comprobarTipoOperacion(nodo) == "Error") {
+					System.out.println("Los tipos de la operacion son diferentes");
+					return false;
+				} else {
+					return true;
+				}
+			}
+			else if(nodoasig.getExpresion() instanceof NodoCallFunc){
+				String funcName = ((NodoCallFunc)nodoasig.getExpresion()).getNombreFuncion();
+				RegistroSimbolo func = this.tablaSimbolos.BuscarFuncion(funcName);
+				if(func != null) {
+					if(func.getTipo() == simboloasig.getTipo()) {
+						return true;
+					} else {
+						System.out.println("El tipo de " + simboloasig.getIdentificador() + " el tipo de " + funcName + " no son el mismo");
+						return false;
+					}
+				} else {
+					System.out.println("La funcion no esta definida");
+					return false;
+				}
+			}
+			else if(nodoasig.getExpresion() instanceof NodoIdentificador) {
+				RegistroSimbolo simboloder = this.tablaSimbolos.BuscarSimbolo(((NodoIdentificador)nodoasig.getExpresion()).getNombre(), ultimoAmbito);
+				if(simboloder == null) {
+					System.out.println("La variable " + ((NodoIdentificador)nodoasig.getExpresion()).getNombre()  + " no esta definida");
+					return false;
+				}
+				
+				if(simboloasig.getTipo() == simboloder.getTipo()) {
+					return true;
+				} else {
+					System.out.println("Los tipo " +simboloasig.getIdentificador()  + "  ," + simboloder.getIdentificador() + " son incopatibles");
+					return false;
+				}
+			}
+			
+			else if(nodoasig.getExpresion() instanceof NodoValor) {
+				String tipo = "Integuer";
+				if(((NodoValor)nodoasig.getExpresion()).getTipo() == 1) tipo = "Boolean";
+				
+				
+				if(simboloasig.getTipo() == tipo) {
+					return true;
+				} else {
+					System.out.println("Los tipos de datos no son captibles:" + simboloasig.getTipo() + " " + tipo );
+					return false;
+				}
+			}
+			
+			
 			return true;
 		}else{
+			System.out.print("El Identificador " + identificador + "no ha sido definido");
 			return false;
 		}
 	}
 	
-	private String verificarTipo (NodoBase nodo) {
+	private String comprobarTipoOperacion (NodoBase nodo) {
 		if (nodo instanceof NodoOperacion) {
 			
-			String tipoOperadorHI = verificarTipo(((NodoOperacion)nodo).getOpIzquierdo());
-			String tipoOperadorHD = verificarTipo(((NodoOperacion)nodo).getOpDerecho());
+			String tipoOperadorHI = comprobarTipoOperacion(((NodoOperacion)nodo).getOpIzquierdo());
+			String tipoOperadorHD = comprobarTipoOperacion(((NodoOperacion)nodo).getOpDerecho());
 			tipoOp operador = ((NodoOperacion)nodo).getOperacion();
 			
 			if(operador == tipoOp.and || operador == tipoOp.or){

@@ -622,6 +622,11 @@ sent_call ::= ID:nombre LPAREN sent_args:sent_args RPAREN
 						if(debug) System.out.println("\t Regla 31");
 						RESULT = new NodoCallFunc(nombre, sent_args);
 					:}
+				|  ID:nombre LPAREN /* Vacio */ RPAREN
+					{:
+						if(debug) System.out.println("\t Regla 31");
+						RESULT = new NodoCallFunc(nombre, null);
+					:}
 			 	;
 
 /* REGLA 32 */
