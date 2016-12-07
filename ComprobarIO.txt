@@ -1,0 +1,37 @@
+	private void comprobarLectura(NodoBase nodo){
+		RegistroSimbolo simbolo = this.tablaSimbolos.BuscarSimbolo(((NodoLeer)nodo).getIdentificador(), ultimoAmbito);
+		if(simbolo != null) {
+
+			if(simbolo.getTipo() != "Integer"){
+				System.out.println("El parametro de la función gets() no es un entero");
+			}
+		}else{
+			System.out.println("Variable no declarada");
+		}
+	}
+	
+	private void comprobarEscritura(NodoBase nodo){
+		NodoEscribir nodoEscribir = (NodoEscribir) nodo;
+		
+		/*------------- Verificar que la variable que lee es entera -------------*/
+		if(nodoEscribir.getExpresion() instanceof NodoIdentificador){
+			String identificador = ((NodoIdentificador)nodoEscribir.getExpresion()).getNombre();		
+			RegistroSimbolo simbolo = this.tablaSimbolos.BuscarSimbolo(identificador, ultimoAmbito);
+			if(simbolo != null){
+				if(simbolo.getTipo() != "Integer"){
+					System.out.println("El parametro de la función puts() no es una variable u operacion entera");
+				}
+			}else{
+				System.out.println("Variable no declarada");
+			}			
+		}
+		
+		/*------- Verificar que la operación aritmetica devuelva un enetro -------*/
+		else if(nodoEscribir.getExpresion() instanceof NodoOperacion){
+			// Faltan comprobar otras operaciones
+			comprobarTipoOperacion(nodo);
+		}
+		else if(nodoEscribir.getExpresion() instanceof NodoValor){
+			System.out.println("Valor");
+		}
+	}
