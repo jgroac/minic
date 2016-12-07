@@ -7,6 +7,7 @@
 package compilador;
 
 import java_cup.runtime.*;
+import compilador.Semantico;
 import ast.*;
 
 /** CUP v0.11a beta 20060608 generated parser.
@@ -391,19 +392,25 @@ Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols
 		/*if (args.length==0) 
 			parser_obj=new parser(new Scanner(System.in,sf),sf);
 		else*/
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/sintactico/ejemplo.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/sintactico/simple.mc"),sf),sf);
 
 		parser_obj.parse();
-		
 		
 		NodoBase root=parser_obj.action_obj.getASTroot();
 		System.out.println();
 		System.out.println("IMPRESION DEL AST GENERADO");
 		System.out.println();
 		ast.Util.imprimirAST(root);
+		
 		TablaSimbolos ts = new TablaSimbolos();
 		ts.cargarTabla(root);
 		ts.ImprimirClaves();
+		
+		Semantico AnalizadorSemantico = new Semantico(ts);
+		AnalizadorSemantico.recorrido(root);
+		
+		//AnSeman.recorrerArbol(root);
+		
 		/*Tiny.Generador.setTablaSimbolos(ts);
 		Tiny.Generador.generarCodigoObjeto(root);
 		*/

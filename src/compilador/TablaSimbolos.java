@@ -95,7 +95,7 @@ public class TablaSimbolos {
 		    	NodoVar nodovar = ((NodoVar)raiz);
 		    	String nombreVar = nodovar.getIdentificador();
 		    	tipoVar = nodovar.getTipo();  
-		    	InsertarSimbolo(nombreVar, 0, tipoVar, ultimoAmbito);
+		    	InsertarSimbolo(nombreVar, tipoVar, 0, ultimoAmbito);
 		    	//TODO: Añadir el numero de linea y localidad de memoria correcta
 		    }
 		    
@@ -147,7 +147,7 @@ public class TablaSimbolos {
 	}
 	
 	//true es nuevo no existe se insertara, false ya existe NO se vuelve a insertar 
-	public boolean InsertarSimbolo(String identificador, int numLinea, String tipo, String ambito){
+	public boolean InsertarSimbolo(String identificador, String tipo, int numLinea, String ambito){
 		HashMap<String, RegistroSimbolo> tablaAmbito = tabla.get(ambito);
 		
 		// Si el ambito no existe mostrar error
@@ -158,7 +158,7 @@ public class TablaSimbolos {
 			
 		// Si la variable ya fue declarada lanzar error;	
 		if(!tablaAmbito.containsKey(identificador)) {
-			RegistroSimbolo simbolo = new RegistroSimbolo(identificador, numLinea, direccion++, ambito);
+			RegistroSimbolo simbolo = new RegistroSimbolo(identificador, tipo, numLinea, direccion++, ambito);
 			tablaAmbito.put(identificador, simbolo);
 			return true;
 		}
@@ -193,7 +193,7 @@ public class TablaSimbolos {
 	
 	private void cargarAgumentos(NodoBase nodo){
     	NodoVar args = (NodoVar) nodo;
-    	InsertarSimbolo(args.getIdentificador(), 0, args.getTipo(), ultimoAmbito);
+    	InsertarSimbolo(args.getIdentificador(), args.getTipo(), 0, ultimoAmbito);
     
 		if (args.TieneHermano()) cargarAgumentos(((NodoVar)nodo).getHermanoDerecha());
 	}

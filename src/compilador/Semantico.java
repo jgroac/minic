@@ -26,24 +26,48 @@ public class Semantico {
 				}
 			}//NodoPrograma		
 			
-			if(raiz instanceof NodoMain){
-				recorrido(((NodoMain)raiz).getCuerpo()); 				
+			else if(raiz instanceof NodoMain){
+				ultimoAmbito = "MAIN";
+				recorrido(((NodoMain)raiz).getCuerpo()); 		
 			}
+			
+			else if(raiz instanceof NodoCuerpo) {
+				recorrido(((NodoCuerpo)raiz).getSentencias());
+			}
+		
+			else if(raiz instanceof NodoFuncion){
+				ultimoAmbito = ((NodoFuncion)raiz).getNombreFuncion();
+				recorrido(((NodoFuncion)raiz).getArgs());
+				recorrido(((NodoFuncion)raiz).getCuerpoFuncion());						
+			}
+			
 			else if(raiz instanceof NodoIf){
 				comprobarIf(raiz);
 			}
+			
 			else if(raiz instanceof NodoWhile){
 				comprobarWhile(raiz);
 			}
+			
 			else if(raiz instanceof NodoDoWhile){
 				comprobarDoWhile(raiz);
 			}
-				
+			
+			else if(raiz instanceof NodoAsignacion){
+				if(!comprobarAsignacion(raiz)){
+					System.out.println("Variable no declarada");
+				}
+			}
+			
+			else if(raiz instanceof NodoCallFunc){	
+			}
+			
+			raiz = raiz.getHermanoDerecha();
 		}//Fin While
 	}//Fin Recorrido
 
 	private void comprobarIf(NodoBase nodo){
-		
+		System.out.println("Entra");
 		if(verificarTipo(((NodoIf)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
 		}
@@ -67,8 +91,19 @@ public class Semantico {
 		
 		if(verificarTipo(((NodoDoWhile)nodo).getPrueba()) != "Boolean"){
 			System.out.println("La operación no devuelve un valor booleano");
-		}
+		}	
+	}
+	
+	private boolean comprobarAsignacion(NodoBase nodo){
 		
+		String identificador = ((NodoAsignacion)nodo).getIdentificador();
+		
+		/* Verifico si la variable existe*/
+		if(!verificarExistencia(identificador, ultimoAmbito)){
+			return true;
+		}else{
+			return false;
+		}
 	}
 	
 	private String verificarTipo (NodoBase nodo) {
@@ -82,7 +117,7 @@ public class Semantico {
 				if(tipoOperadorHI == "Boolean" && tipoOperadorHD == "Boolean"){
 					return "Boolean";
 				} else {
-					return "typeError";
+					return "Error";
 				}
 			}
 			
@@ -93,7 +128,7 @@ public class Semantico {
 					return "Boolean";
 				}
 				else {
-					return "typeError";
+					return "Error";
 				}
 			}
 			
@@ -105,14 +140,14 @@ public class Semantico {
 					if(tipoOperadorHI == "Integer" && tipoOperadorHD == "Integer" ) {
 						return "Integer";
 					} else {
-						return "typeError";
+						return "Error";
 					}
 				
 			} else {
 				if(tipoOperadorHI == "Integer" && tipoOperadorHD == "Integer") {
 					return "Boolean";
 				} else {
-					return "typeError";
+					return "Error";
 				}
 			}
 		}
@@ -123,7 +158,7 @@ public class Semantico {
 				String tipo = this.tablaSimbolos.getTipo(nombre);
 				return tipo;
 			}
-			return "typeError";
+			return "Error";
 		}*/
 		
 		else if (nodo instanceof NodoValor) {
@@ -136,12 +171,11 @@ public class Semantico {
 				return "Boolean";	
 		}
 		
-		return "typeError";
+		return "Error";
 	}
-		
-	/*
-	private boolean verificarExistencia(String nombre){
-		return this.tablaSimbolos.BuscarVariable(nombre);
-	}*/
+
+	private boolean verificarExistencia(String nombre, String ambito){
+		return this.tablaSimbolos.BuscarSimbolo(nombre, ambito) != null;
+	}
 
 }
