@@ -61,6 +61,19 @@ public class Semantico {
 				comprobarEscritura(raiz);
 			}
 			
+			else if(raiz instanceof NodoFor){
+				
+				comprobarAsignacion(((NodoFor) raiz).getDeclaracion());
+				((NodoFor) raiz).getExpresion();
+				
+				if(((NodoFor) raiz).getExpresion() instanceof NodoOperacion){
+					if(comprobarTipoOperacion(((NodoFor) raiz).getExpresion()) != "Boolean"){
+						System.out.println("Error, la expresión no es booleana");
+					}
+				}				
+				
+			}
+			
 			else if(raiz instanceof NodoAsignacion){
 				this.anyError = !comprobarAsignacion(raiz);
 			}
@@ -169,7 +182,7 @@ public class Semantico {
 			
 			return true;
 		}else{
-			System.out.print("El Identificador " + identificador + "no ha sido definido");
+			System.out.print("El Identificador " + identificador + " no ha sido definido");
 			return false;
 		}
 	}
