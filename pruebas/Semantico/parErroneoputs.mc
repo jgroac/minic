@@ -1,7 +1,7 @@
 /* Parametro erroneo gets */
 void main(){
 	int b;
-	int a;
+	bool a;
 
     b = 5;
 

@@ -386,31 +386,31 @@ SymbolFactory es una nueva caracteristica que ha sido a�adida a las version 11
 Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols-in-cup/
 ***********/
 
-	public static void main(String args[]) throws Exception {
-		SymbolFactory sf = new DefaultSymbolFactory();
-		parser parser_obj;
-		/*if (args.length==0) 
-			parser_obj=new parser(new Scanner(System.in,sf),sf);
-		else*/
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/semantico/parErroneoputs.mc"),sf),sf);
-
-		parser_obj.parse();
-		
-		
-		NodoBase root=parser_obj.action_obj.getASTroot();
-		System.out.println();
-		System.out.println("IMPRESION DEL AST GENERADO");
-		System.out.println();
-		ast.Util.imprimirAST(root);
-		TablaSimbolos ts = new TablaSimbolos();
-		ts.cargarTabla(root);
-		ts.ImprimirClaves();
-		Semantico analizadorSemantico = new Semantico(ts);
-		analizadorSemantico.recorrido(root);
-		/*Tiny.Generador.setTablaSimbolos(ts);
-		Tiny.Generador.generarCodigoObjeto(root);
-		*/
-	}
+//	public static void main(String args[]) throws Exception {
+//		SymbolFactory sf = new DefaultSymbolFactory();
+//		parser parser_obj;
+//		/*if (args.length==0) 
+//			parser_obj=new parser(new Scanner(System.in,sf),sf);
+//		else*/
+//		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/semantico/parErroneoputs.mc"),sf),sf);
+//
+//		parser_obj.parse();
+//		
+//		
+//		NodoBase root=parser_obj.action_obj.getASTroot();
+//		System.out.println();
+//		System.out.println("IMPRESION DEL AST GENERADO");
+//		System.out.println();
+//		ast.Util.imprimirAST(root);
+//		TablaSimbolos ts = new TablaSimbolos();
+//		ts.cargarTabla(root);
+//		ts.ImprimirClaves();
+//		Semantico analizadorSemantico = new Semantico(ts);
+//		analizadorSemantico.recorrido(root);
+//		/*Tiny.Generador.setTablaSimbolos(ts);
+//		Tiny.Generador.generarCodigoObjeto(root);
+//		*/
+//	}
 
 
 }
