@@ -392,7 +392,7 @@ Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols
 		/*if (args.length==0) 
 			parser_obj=new parser(new Scanner(System.in,sf),sf);
 		else*/
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/sintactico/simple.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/semantico/parErroneoputs.mc"),sf),sf);
 
 		parser_obj.parse();
 		

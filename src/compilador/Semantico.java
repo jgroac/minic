@@ -53,6 +53,14 @@ public class Semantico {
 				comprobarDoWhile(raiz);
 			}
 			
+			else if(raiz instanceof NodoLeer) {
+				comprobarLectura(raiz);
+			}
+			
+			else if(raiz instanceof NodoEscribir) {
+				comprobarEscritura(raiz);
+			}
+			
 			else if(raiz instanceof NodoAsignacion){
 				this.anyError = !comprobarAsignacion(raiz);
 			}
@@ -233,6 +241,54 @@ public class Semantico {
 		}
 		
 		return "Error";
+	}
+	
+	private void comprobarLectura(NodoBase nodo){
+		RegistroSimbolo simbolo = this.tablaSimbolos.BuscarSimbolo(((NodoLeer)nodo).getIdentificador(), ultimoAmbito);
+		if(simbolo != null) {
+
+			if(simbolo.getTipo() != "Integer"){
+				System.out.println("El parametro de la funcion gets() no es un entero");
+				this.anyError = true;
+			}
+		}else{
+			System.out.println("Variable no declarada");
+			this.anyError = true;
+		}
+	}
+	
+	private void comprobarEscritura(NodoBase nodo){
+		NodoEscribir nodoEscribir = (NodoEscribir) nodo;
+		
+		/*------------- Verificar que la variable que lee es entera -------------*/
+		if(nodoEscribir.getExpresion() instanceof NodoIdentificador){
+			String identificador = ((NodoIdentificador)nodoEscribir.getExpresion()).getNombre();		
+			RegistroSimbolo simbolo = this.tablaSimbolos.BuscarSimbolo(identificador, ultimoAmbito);
+			if(simbolo != null){
+				if(simbolo.getTipo() != "Integer"){
+					System.out.println("El parametro de la funcion puts() no es una variable u operacion entera");
+					this.anyError = true;
+				}
+			}else{
+				System.out.println("Variable no declarada");
+				this.anyError = true;
+			}			
+		}
+		
+		/*------- Verificar que la operacion aritmetica devuelva un enetro -------*/
+		else if(nodoEscribir.getExpresion() instanceof NodoOperacion){
+			if(comprobarTipoOperacion(nodoEscribir.getExpresion()) != "Integer") {
+				System.out.println("La funcion puts acepta solo expresiones enteras");
+				this.anyError = true;
+			}
+		}
+		else if(nodoEscribir.getExpresion() instanceof NodoValor){
+			NodoValor valor = (NodoValor) nodoEscribir.getExpresion();
+			if(valor.getTipo() != 0) {
+				System.out.println("La funcion puts acepta solo expresiones enteras");
+				this.anyError = true;
+			}
+		}
 	}
 
 	private boolean verificarExistencia(String nombre, String ambito){
