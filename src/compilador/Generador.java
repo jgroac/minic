@@ -34,6 +34,7 @@ public class Generador {
 	 */
 	private static int desplazamientoTmp = 0;
 	private static TablaSimbolos tablaSimbolos = null;
+	private static String ultimoAmbito;
 	
 	public static void setTablaSimbolos(TablaSimbolos tabla){
 		tablaSimbolos = tabla;
@@ -59,7 +60,29 @@ public class Generador {
 	//prerequisito: Fijar la tabla de simbolos antes de generar el codigo objeto 
 	private static void generar(NodoBase nodo){
 	if(tablaSimbolos!=null){
-		if (nodo instanceof  NodoIf){
+		
+		if(nodo instanceof NodoPrograma){
+	    	NodoFuncion funciones = (NodoFuncion) ((NodoPrograma)nodo).getListaFunciones();
+	    	NodoMain  mainf = (NodoMain) ((NodoPrograma)nodo).getMain();
+	    	// Si existen funciones se generar
+	    	if(funciones != null) generar(funciones);
+	    	// Si no se genera solo el main
+	    	generar(mainf);
+		}
+		else if(nodo instanceof NodoFuncion){
+			ultimoAmbito = ((NodoFuncion)nodo).getNombreFuncion();
+			// Llamar al generador de funciones
+			
+		}
+		
+		else if(nodo instanceof NodoMain){
+			ultimoAmbito = "MAIN";
+			generar(((NodoMain)nodo).getCuerpo());
+		}
+		else if (nodo instanceof NodoCuerpo) { 
+			generar(((NodoCuerpo)nodo).getSentencias());
+		}
+		else if (nodo instanceof  NodoIf){
 			generarIf(nodo);
 		}else if (nodo instanceof  NodoRepeat){
 			generarRepeat(nodo);
@@ -75,6 +98,8 @@ public class Generador {
 			generarEscribir(nodo);
 		}else if (nodo instanceof NodoValor){
 			generarValor(nodo);
+		}else if(nodo instanceof NodoVar) {
+			// Este nodo solo identifica las variables
 		}else if (nodo instanceof NodoIdentificador){
 			generarIdentificador(nodo);
 		}else if (nodo instanceof NodoOperacion){
@@ -175,7 +200,7 @@ public class Generador {
 		/* Genero el codigo para la expresion a la derecha de la asignacion */
 		generar(n.getExpresion());
 		/* Ahora almaceno el valor resultante */
-		direccion = tablaSimbolos.getDireccion(n.getIdentificador());
+		direccion = tablaSimbolos.getDireccion(n.getIdentificador(), ultimoAmbito);
 		UtGen.emitirRM("ST", UtGen.AC, direccion, UtGen.GP, "asignacion: almaceno el valor para el id "+n.getIdentificador());
 		if(UtGen.debug)	UtGen.emitirComentario("<- asignacion");
 	}
@@ -185,7 +210,7 @@ public class Generador {
 		int direccion;
 		if(UtGen.debug)	UtGen.emitirComentario("-> leer");
 		UtGen.emitirRO("IN", UtGen.AC, 0, 0, "leer: lee un valor entero ");
-		direccion = tablaSimbolos.getDireccion(n.getIdentificador());
+		direccion = tablaSimbolos.getDireccion(n.getIdentificador(), ultimoAmbito);
 		UtGen.emitirRM("ST", UtGen.AC, direccion, UtGen.GP, "leer: almaceno el valor entero leido en el id "+n.getIdentificador());
 		if(UtGen.debug)	UtGen.emitirComentario("<- leer");
 	}
@@ -211,7 +236,7 @@ public class Generador {
 		NodoIdentificador n = (NodoIdentificador)nodo;
 		int direccion;
 		if(UtGen.debug)	UtGen.emitirComentario("-> identificador");
-		direccion = tablaSimbolos.getDireccion(n.getNombre());
+		direccion = tablaSimbolos.getDireccion(n.getNombre(), ultimoAmbito);
 		UtGen.emitirRM("LD", UtGen.AC, direccion, UtGen.GP, "cargar valor de identificador: "+n.getNombre());
 		if(UtGen.debug)	UtGen.emitirComentario("-> identificador");
 	}
@@ -256,7 +281,7 @@ public class Generador {
 	
 	//TODO: enviar preludio a archivo de salida, obtener antes su nombre
 	private static void generarPreludioEstandar(){
-		UtGen.emitirComentario("Compilacion TINY para el codigo objeto TM");
+		UtGen.emitirComentario("Compilacion MINIC para el codigo objeto TM");
 		UtGen.emitirComentario("Archivo: "+ "NOMBRE_ARREGLAR");
 		/*Genero inicializaciones del preludio estandar*/
 		/*Todos los registros en tiny comienzan en cero*/

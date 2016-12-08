@@ -21,7 +21,7 @@ public class Compilador {
 //			parser_obj=new parser(s,sf);
 //		}
 		
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/semantico/parErroneoputs.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/puts.mc"),sf),sf);
 
 		parser_obj.parse();
 		
@@ -36,9 +36,10 @@ public class Compilador {
 		ts.ImprimirClaves();
 		Semantico analizadorSemantico = new Semantico(ts);
 		analizadorSemantico.recorrido(root);
-		/*Tiny.Generador.setTablaSimbolos(ts);
-		Tiny.Generador.generarCodigoObjeto(root);
-		*/
+		if(!analizadorSemantico.hasErrors()){
+			compilador.Generador.setTablaSimbolos(ts);
+			compilador.Generador.generarCodigoObjeto(root);
+		}
 	}
 	
 }

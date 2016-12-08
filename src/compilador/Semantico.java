@@ -290,6 +290,10 @@ public class Semantico {
 			}
 		}
 	}
+	
+	public boolean hasErrors(){
+		return this.anyError;
+	}
 
 	private boolean verificarExistencia(String nombre, String ambito){
 		return this.tablaSimbolos.BuscarSimbolo(nombre, ambito) != null;

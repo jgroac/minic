@@ -195,8 +195,8 @@ public class TablaSimbolos {
 		}
 	}
 
-	public int getDireccion(String Clave){
-		return BuscarSimbolo(null, Clave).getDireccionMemoria();
+	public int getDireccion(String Clave, String ambito){
+		return BuscarSimbolo(Clave, ambito).getDireccionMemoria();
 	}
 	
 	private void cargarAgumentos(NodoBase nodo){
