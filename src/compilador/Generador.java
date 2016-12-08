@@ -95,6 +95,8 @@ public class Generador {
 			generarIf(nodo);
 		}else if (nodo instanceof  NodoRepeat){
 			generarRepeat(nodo);
+		}else if(nodo instanceof NodoFor){
+			generarFor(nodo);
 		}else if (nodo instanceof  NodoWhile){
 			generarWhile(nodo);
 		}else if (nodo instanceof  NodoDoWhile){
@@ -219,6 +221,32 @@ public class Generador {
     	}
 		
 		if(UtGen.debug)	UtGen.emitirComentario("<- if");
+	}
+	
+	private static void generarFor(NodoBase nodo){
+		
+		int localidadSaltoInicio;
+		int localidadSaltoEnd;
+		int localidadActual;
+
+		if(UtGen.debug)	UtGen.emitirComentario("-> For"); /* No sirve para nada  */
+
+			generarAsignacion(((NodoFor)nodo).getDeclaracion());
+			localidadSaltoInicio = UtGen.emitirSalto(0);
+			
+			UtGen.emitirComentario("for: el salto hacia el final (luego del cuerpo) del for debe estar aqui");
+			generarOperacion(((NodoFor)nodo).getExpresion());
+			localidadSaltoEnd = UtGen.emitirSalto(1);
+			
+			generar(((NodoFor)nodo).getCuerpo(), true);
+			generarAsignacion(((NodoFor)nodo).getDeclaracion());
+			
+			UtGen.emitirRM_Abs("LDA", UtGen.PC, localidadSaltoInicio, "if: vamos hacia el inicio");
+			localidadActual = UtGen.emitirSalto(0);
+			UtGen.cargarRespaldo(localidadSaltoEnd);
+			
+			UtGen.emitirRM_Abs("JEQ", UtGen.AC, localidadActual, "for: jmp hacia el fin del cuerpo");
+			UtGen.restaurarRespaldo();	
 	}
 	
 	private static void generarRepeat(NodoBase nodo){
