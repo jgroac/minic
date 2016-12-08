@@ -63,12 +63,12 @@ public class Semantico {
 			
 			else if(raiz instanceof NodoFor){
 				
-				comprobarAsignacion(((NodoFor) raiz).getDeclaracion());
-				((NodoFor) raiz).getExpresion();
+				this.anyError = !comprobarAsignacion(((NodoFor) raiz).getDeclaracion());
 				
 				if(((NodoFor) raiz).getExpresion() instanceof NodoOperacion){
 					if(comprobarTipoOperacion(((NodoFor) raiz).getExpresion()) != "Boolean"){
 						System.out.println("Error, la expresión no es booleana");
+						this.anyError = true;
 					}
 				}				
 				
