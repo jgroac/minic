@@ -1,5 +1,7 @@
 package compilador;
 
+import java.util.ArrayList;
+
 import ast.*;
 
 public class Generador {
@@ -34,6 +36,8 @@ public class Generador {
 	 */
 	private static int desplazamientoTmp = 0;
 	private static TablaSimbolos tablaSimbolos = null;
+	private static ArrayList<Integer> localidad_return = new ArrayList<Integer>();
+	private static int saltomain;
 	private static String ultimoAmbito;
 	
 	public static void setTablaSimbolos(TablaSimbolos tabla){
@@ -47,7 +51,7 @@ public class Generador {
 		System.out.println();
 		System.out.println();
 		generarPreludioEstandar();
-		generar(raiz);
+		generar(raiz, true);
 		/*Genero el codigo de finalizacion de ejecucion del codigo*/   
 		UtGen.emitirComentario("Fin de la ejecucion.");
 		UtGen.emitirRO("HALT", 0, 0, 0, "");
@@ -58,31 +62,36 @@ public class Generador {
 	
 	//Funcion principal de generacion de codigo
 	//prerequisito: Fijar la tabla de simbolos antes de generar el codigo objeto 
-	private static void generar(NodoBase nodo){
+	private static void generar(NodoBase nodo, boolean generarHermanoDerecho){
 	if(tablaSimbolos!=null){
 		
 		if(nodo instanceof NodoPrograma){
 	    	NodoFuncion funciones = (NodoFuncion) ((NodoPrograma)nodo).getListaFunciones();
 	    	NodoMain  mainf = (NodoMain) ((NodoPrograma)nodo).getMain();
 	    	// Si existen funciones se generar
-	    	if(funciones != null) generar(funciones);
+	    	if(funciones != null) generar(funciones, true);
 	    	// Si no se genera solo el main
-	    	generar(mainf);
+	    	generar(mainf, true);
 		}
 		else if(nodo instanceof NodoFuncion){
 			ultimoAmbito = ((NodoFuncion)nodo).getNombreFuncion();
 			// Llamar al generador de funciones
+			generarFuncion(nodo);
 			
 		}
 		
 		else if(nodo instanceof NodoMain){
 			ultimoAmbito = "MAIN";
-			generar(((NodoMain)nodo).getCuerpo());
+			generarMain(nodo);
 		}
 		else if (nodo instanceof NodoCuerpo) { 
-			generar(((NodoCuerpo)nodo).getSentencias());
+			generar(((NodoCuerpo)nodo).getSentencias(), true);
 		}
-		else if (nodo instanceof  NodoIf){
+		else if(nodo instanceof NodoCallFunc){
+			generarCall(nodo);
+		}else if(nodo instanceof NodoReturn){
+			generarReturn(nodo);
+		}else if (nodo instanceof  NodoIf){
 			generarIf(nodo);
 		}else if (nodo instanceof  NodoRepeat){
 			generarRepeat(nodo);
@@ -109,21 +118,91 @@ public class Generador {
 		}
 		/*Si el hijo de extrema izquierda tiene hermano a la derecha lo genero tambien*/
 		if(nodo.TieneHermano())
-			generar(nodo.getHermanoDerecha());
+			if(generarHermanoDerecho)
+				generar(nodo.getHermanoDerecha(), true);
 	}else
 		System.out.println("¡¡¡ERROR: por favor fije la tabla de simbolos a usar antes de generar codigo objeto!!!");
 }
+	
+
+	private static void generarFuncion(NodoBase nodo){
+		//aqui debo de poner el Imen a la tabla
+			desplazamientoTmp = -40;
+			int pos=UtGen.emitirSalto(0);
+			tablaSimbolos.setTablaPosFunc(ultimoAmbito, pos);
+			NodoFuncion n = (NodoFuncion)nodo;
+			if(n.getCuerpoFuncion()!=null)
+				generar(n.getCuerpoFuncion(), true);			
+			//coloco todos los saltos de los return ya que se donde termina la funcion
+			pos=UtGen.emitirSalto(0);
+			for	(int i=0; i<localidad_return.size();i++){
+				UtGen.cargarRespaldo(localidad_return.get(i));
+				UtGen.emitirRM("LDA", UtGen.PC, pos, UtGen.GP, "salto del return");
+				UtGen.restaurarRespaldo();
+			}
+			localidad_return.clear();
+			//Salto incondicional a donde quede
+			UtGen.emitirRM("LDA", UtGen.PC, 0,UtGen.NL, "Salto incodicional a donde fue llamada la funcion");
+			desplazamientoTmp=0;
+	}
+	
+	private static void generarMain(NodoBase nodo){
+			//iniciar la ejecucion en la linea #line main
+			int pos = UtGen.emitirSalto(0);
+			UtGen.cargarRespaldo(saltomain);
+			UtGen.emitirRM("LDA", UtGen.PC, pos,UtGen.GP, "Salto incodicional al main");
+			UtGen.restaurarRespaldo();
+			generar(((NodoMain) nodo).getCuerpo(), true);
+			pos=UtGen.emitirSalto(0);
+			for	(int i=0; i<localidad_return.size();i++){
+				UtGen.cargarRespaldo(localidad_return.get(i));
+				UtGen.emitirRM("LDA", UtGen.PC, pos, UtGen.GP, "salto del return");
+				UtGen.restaurarRespaldo();
+			}
+			localidad_return.clear();
+	}
+	
+	private static void generarCall(NodoBase nodo) {
+		NodoCallFunc n = (NodoCallFunc)nodo;
+		if (n.getArgs()!=null){	
+			NodoBase aux = n.getArgs();
+			ArrayList<String> argsList = tablaSimbolos.getArgsFuncion(n.getNombreFuncion());
+			for(String nom: argsList) {
+				generar(aux, false);
+				int dirMem = tablaSimbolos.getDireccion(nom,n.getNombreFuncion());
+				UtGen.emitirRM("ST", UtGen.AC, dirMem, UtGen.GP, "llamado: guarda el valor del argumento");	
+				aux = aux.getHermanoDerecha();
+			}
+			
+		}	
+		//Poner en NL la linea actual + 1
+		if(UtGen.debug)	UtGen.emitirComentario("-> CALLFUNC");
+		UtGen.emitirRM("LDA", UtGen.NL, 1, UtGen.PC, "(AC=Pos actual + 1)");
+		
+		//saltar a la linea donde empieza la funcion
+		int pos = tablaSimbolos.getTablaPosFun(((n.getNombreFuncion())));
+		UtGen.emitirRM("LDA", UtGen.PC, pos,UtGen.GP, "Salto a la primera linea de la funcion");
+	}
+	
+	private static void generarReturn(NodoBase nodo){
+		if(((NodoReturn)nodo).getExp()!=null)
+		       generar(((NodoReturn)nodo).getExp(), true);
+		//la setencia anterior deja en AC el valor retornado		
+		//Guargo una posicion para saltar a la linea donde termina la funcion
+		localidad_return.add(UtGen.emitirSalto(1));
+
+	}
 
 	private static void generarIf(NodoBase nodo){
     	NodoIf n = (NodoIf)nodo;
 		int localidadSaltoElse,localidadSaltoEnd,localidadActual;
 		if(UtGen.debug)	UtGen.emitirComentario("-> if");
 		/*Genero el codigo para la parte de prueba del IF*/
-		generar(n.getPrueba());
+		generar(n.getPrueba(), true);
 		localidadSaltoElse = UtGen.emitirSalto(1);
 		UtGen.emitirComentario("If: el salto hacia el else debe estar aqui");
 		/*Genero la parte THEN*/
-		generar(n.getCuerpoIf());
+		generar(n.getCuerpoIf(), true);
 		localidadSaltoEnd = UtGen.emitirSalto(1);
 		UtGen.emitirComentario("If: el salto hacia el final debe estar aqui");
 		localidadActual = UtGen.emitirSalto(0);
@@ -132,7 +211,7 @@ public class Generador {
 		UtGen.restaurarRespaldo();
 		/*Genero la parte ELSE*/
 		if(n.getCuerpoElse()!=null){
-			generar(n.getCuerpoElse());
+			generar(n.getCuerpoElse(), true);
 			localidadActual = UtGen.emitirSalto(0);
 			UtGen.cargarRespaldo(localidadSaltoEnd);
 			UtGen.emitirRM_Abs("LDA", UtGen.PC, localidadActual, "if: jmp hacia el final");
@@ -149,9 +228,9 @@ public class Generador {
 			localidadSaltoInicio = UtGen.emitirSalto(0);
 			UtGen.emitirComentario("repeat: el salto hacia el final (luego del cuerpo) del repeat debe estar aqui");
 			/* Genero el cuerpo del repeat */
-			generar(n.getCuerpo());
+			generar(n.getCuerpo(), true);
 			/* Genero el codigo de la prueba del repeat */
-			generar(n.getPrueba());
+			generar(n.getPrueba(), true);
 			UtGen.emitirRM_Abs("JEQ", UtGen.AC, localidadSaltoInicio, "repeat: jmp hacia el inicio del cuerpo");
 		if(UtGen.debug)	UtGen.emitirComentario("<- repeat");
 	}
@@ -163,11 +242,11 @@ public class Generador {
 		if(UtGen.debug)	UtGen.emitirComentario("-> while");
 		localidadSaltoInicio = UtGen.emitirSalto(0);
 		UtGen.emitirComentario("while: aqui deberia ir el marcado del inicio del while");
-		generar(n.getPrueba());
+		generar(n.getPrueba(), true);
 		localidadSaltoCondicional = UtGen.emitirSalto(1);
 		if(UtGen.debug)	UtGen.emitirComentario("-> cuerpo while");
 		/* Genero el cuerpo del while */
-		generar(n.getCuerpo());
+		generar(n.getCuerpo(), true);
 		//Salto al Inicio del while
 		UtGen.emitirRM_Abs("LDA", UtGen.PC, localidadSaltoInicio, "if: jmp hacia el final");
 		
@@ -186,8 +265,8 @@ public class Generador {
 		if(UtGen.debug)	UtGen.emitirComentario("-> while");
 		localidadInicioCiclo = UtGen.emitirSalto(0);
 		UtGen.emitirComentario("while: aqui deberia ir el marcado del inicio del while");
-		generar(n.getCuerpo());
-		generar(n.getPrueba());
+		generar(n.getCuerpo(), true);
+		generar(n.getPrueba(), true);
 		UtGen.emitirRM_Abs("JNE", UtGen.AC, localidadInicioCiclo, "do while: jmp hacia el inicio");
 	}		
 
@@ -198,7 +277,7 @@ public class Generador {
 		int direccion;
 		if(UtGen.debug)	UtGen.emitirComentario("-> asignacion");		
 		/* Genero el codigo para la expresion a la derecha de la asignacion */
-		generar(n.getExpresion());
+		generar(n.getExpresion(), true);
 		/* Ahora almaceno el valor resultante */
 		direccion = tablaSimbolos.getDireccion(n.getIdentificador(), ultimoAmbito);
 		UtGen.emitirRM("ST", UtGen.AC, direccion, UtGen.GP, "asignacion: almaceno el valor para el id "+n.getIdentificador());
@@ -219,7 +298,7 @@ public class Generador {
 		NodoEscribir n = (NodoEscribir)nodo;
 		if(UtGen.debug)	UtGen.emitirComentario("-> escribir");
 		/* Genero el codigo de la expresion que va a ser escrita en pantalla */
-		generar(n.getExpresion());
+		generar(n.getExpresion(), true);
 		/* Ahora genero la salida */
 		UtGen.emitirRO("OUT", UtGen.AC, 0, 0, "escribir: genero la salida de la expresion");
 		if(UtGen.debug)	UtGen.emitirComentario("<- escribir");
@@ -245,11 +324,11 @@ public class Generador {
 		NodoOperacion n = (NodoOperacion) nodo;
 		if(UtGen.debug)	UtGen.emitirComentario("-> Operacion: " + n.getOperacion());
 		/* Genero la expresion izquierda de la operacion */
-		generar(n.getOpIzquierdo());
+		generar(n.getOpIzquierdo(), true);
 		/* Almaceno en la pseudo pila de valor temporales el valor de la operacion izquierda */
 		UtGen.emitirRM("ST", UtGen.AC, desplazamientoTmp--, UtGen.MP, "op: push en la pila tmp el resultado expresion izquierda");
 		/* Genero la expresion derecha de la operacion */
-		generar(n.getOpDerecho());
+		generar(n.getOpDerecho(), true);
 		/* Ahora cargo/saco de la pila el valor izquierdo */
 		UtGen.emitirRM("LD", UtGen.AC1, ++desplazamientoTmp, UtGen.MP, "op: pop o cargo de la pila el valor izquierdo en AC1");
 		switch(n.getOperacion()){
@@ -288,6 +367,8 @@ public class Generador {
 		UtGen.emitirComentario("Preludio estandar:");
 		UtGen.emitirRM("LD", UtGen.MP, 0, UtGen.AC, "cargar la maxima direccion desde la localidad 0");
 		UtGen.emitirRM("ST", UtGen.AC, 0, UtGen.AC, "limpio el registro de la localidad 0");
+		
+		saltomain = UtGen.emitirSalto(1);
 	}
 
 }

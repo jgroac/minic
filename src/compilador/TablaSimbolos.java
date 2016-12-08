@@ -29,7 +29,8 @@ public class TablaSimbolos {
 	/* Argumentos que recibe una funcion */
 	public ArrayList<String> listaArgumentos;
 	private HashMap <String, ArrayList<String>> tablaDeArgumentos;
-	
+	/* Contiene la linea inicial de la ejecucion de la  func */
+	private HashMap <String, Integer> tablaPosFunc;
 	
 	private HashMap <String, String> tablaTipo;
 	String tipoVar;
@@ -44,6 +45,7 @@ public class TablaSimbolos {
 		direccion=0;
 		tablaFunciones = new HashMap <String, String>();
 		tablaDeArgumentos = new HashMap <String, ArrayList<String>>();
+		tablaPosFunc = new HashMap<String, Integer>();
 		tablaTipo = new HashMap<String,String>();
 		direccion=0;
 	}
@@ -202,6 +204,7 @@ public class TablaSimbolos {
 	private void cargarAgumentos(NodoBase nodo){
     	NodoVar args = (NodoVar) nodo;
     	InsertarSimbolo(args.getIdentificador(), args.getTipo(), 0, ultimoAmbito);
+    	listaArgumentos.add(args.getIdentificador());
     
 		if (args.TieneHermano()) cargarAgumentos(((NodoVar)nodo).getHermanoDerecha());
 	}
@@ -223,6 +226,17 @@ public class TablaSimbolos {
 		return tabla.get(ambito) != null;
 	}
 	
+	public void setTablaPosFunc(String ambito, Integer linea) {
+		this.tablaPosFunc.put(ambito, linea);
+	}
+	
+	public Integer getTablaPosFun(String ambito) {
+		return this.tablaPosFunc.get(ambito);
+	}
+	
+	public ArrayList<String> getArgsFuncion(String ambito){
+		return this.tablaDeArgumentos.get(ambito);
+	}
 	/*
 	 * TODO:
 	 * 1. Crear lista con las lineas de codigo donde la variable es usada.

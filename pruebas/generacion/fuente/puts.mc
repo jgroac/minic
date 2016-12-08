@@ -1,11 +1,9 @@
+int sum(int a, int b) {
+	return a + b;
+}
+
 void main(){
 	
-	int a, b, c;
-
-	a = 2;
-	b = 2;
-	c = a + b;
-	puts(c);
-
-	puts(2 + 5);
+	int c;
+	c = sum( 2 + 3, 7);
 }
