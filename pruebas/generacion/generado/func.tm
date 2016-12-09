@@ -39,5 +39,11 @@
 19:       LDA       7,3(5)      Salto a la primera linea de la funcion
 20:       ST       0,2(5)      asignacion: almaceno el valor para el id c
 *      <- asignacion
+*      -> escribir
+*      -> identificador
+21:       LD       0,2(5)      cargar valor de identificador: c
+*      -> identificador
+22:       OUT       0,0,0      escribir: genero la salida de la expresion
+*      <- escribir
 *      Fin de la ejecucion.
-21:       HALT       0,0,0   
+23:       HALT       0,0,0

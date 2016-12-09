@@ -1,9 +1,6 @@
-int sum(int a, int b) {
-	return a + b;
-}
-
 void main(){
 	
-	int c;
-	c = sum( 2 + 3, 7);
+	int a, b, c;
+	c = a + b;
+	puts(c);
 }
