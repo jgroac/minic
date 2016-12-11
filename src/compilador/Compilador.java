@@ -21,7 +21,7 @@ public class Compilador {
 //			parser_obj=new parser(s,sf);
 //		}
 		
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/func.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/pointer.mc"),sf),sf);
 
 		parser_obj.parse();
 		
@@ -36,6 +36,8 @@ public class Compilador {
 		ts.ImprimirClaves();
 		Semantico analizadorSemantico = new Semantico(ts);
 		analizadorSemantico.recorrido(root);
+		
+		// Si el semantico no tiene errores se genera codigo
 		if(!analizadorSemantico.hasErrors()){
 			compilador.Generador.setTablaSimbolos(ts);
 			compilador.Generador.generarCodigoObjeto(root);
