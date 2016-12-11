@@ -7,6 +7,8 @@ public class RegistroSimbolo {
 	private int DireccionMemoria;
 	private String ambito;
 	private String tipo;
+	private int direccionDeApuntador;
+	private boolean pointer;
 	
 	public RegistroSimbolo(String identificador, int numLinea,
 			int direccionMemoria) {
@@ -14,16 +16,20 @@ public class RegistroSimbolo {
 		this.identificador = identificador;
 		NumLinea = numLinea;
 		DireccionMemoria = direccionMemoria;
+		direccionDeApuntador = 0;
+		pointer = false;
 	}
 	
 	public RegistroSimbolo(String identificador, String tipo, int numLinea,
-			int direccionMemoria, String ambito) {
+			int direccionMemoria, String ambito, boolean isPointer) {
 		super();
 		this.identificador = identificador;
 		this.tipo = tipo;
 		NumLinea = numLinea;
 		DireccionMemoria = direccionMemoria;
 		this.ambito = ambito;
+		direccionDeApuntador = 0;
+		this.pointer = isPointer;
 	}
 
 	public String getIdentificador() {
@@ -48,6 +54,18 @@ public class RegistroSimbolo {
 	
 	public String getTipo(){
 		return this.tipo;
+	}
+	
+	public boolean isPointer() {
+		return this.pointer;
+	}
+	
+	public void setApuntador(int apuntar) {
+		this.direccionDeApuntador = apuntar;
+	}
+	
+	public int getApuntador() {
+		return this.direccionDeApuntador;
 	}
 	
 }

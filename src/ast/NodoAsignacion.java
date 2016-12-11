@@ -23,7 +23,7 @@ public class NodoAsignacion extends NodoBase {
 		super();
 		this.identificador = identificador;
 		this.expresion = expresion;
-		this.pointer = true;
+		this.pointer = pointer;
 	}
 
 	public String getIdentificador() {
@@ -42,6 +42,9 @@ public class NodoAsignacion extends NodoBase {
 		this.expresion = expresion;
 	}
 	
+	public boolean isPointer() {
+		return this.pointer;
+	}	
 	
 	
 }

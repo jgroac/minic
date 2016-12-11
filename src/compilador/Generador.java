@@ -39,6 +39,7 @@ public class Generador {
 	private static ArrayList<Integer> localidad_return = new ArrayList<Integer>();
 	private static int saltomain;
 	private static String ultimoAmbito;
+	private static NodoBase pointer;
 	
 	public static void setTablaSimbolos(TablaSimbolos tabla){
 		tablaSimbolos = tabla;
@@ -302,6 +303,24 @@ public class Generador {
 	
 	private static void generarAsignacion(NodoBase nodo){
 		NodoAsignacion n = (NodoAsignacion)nodo;
+		
+		// Si es un puntero lo guardamos como puntero
+		if(tablaSimbolos.BuscarSimbolo(n.getIdentificador(), ultimoAmbito).isPointer()) pointer = n;
+		else pointer = null;
+		
+		if(n.isPointer()) {
+			int direccion;
+			if(UtGen.debug)	UtGen.emitirComentario("-> asignacion tipo puntero: *id = exp");
+			/* Genero el codigo para la expresion a la derecha de la asignacion */
+			generar(n.getExpresion(), true);
+			/* Ahora almaceno el valor resultante  opteniendo la direccion a la que apunto*/
+			direccion = tablaSimbolos.BuscarSimbolo(n.getIdentificador(), ultimoAmbito).getApuntador();
+			UtGen.emitirRM("ST", UtGen.AC, direccion, UtGen.GP, "asignacion: almaceno el valor en la direccion que apunta "+n.getIdentificador());
+			if(UtGen.debug)	UtGen.emitirComentario("<- asignacion");
+			return;
+		}
+		
+		
 		int direccion;
 		if(UtGen.debug)	UtGen.emitirComentario("-> asignacion");		
 		/* Genero el codigo para la expresion a la derecha de la asignacion */
@@ -342,6 +361,30 @@ public class Generador {
 	private static void generarIdentificador(NodoBase nodo){
 		NodoIdentificador n = (NodoIdentificador)nodo;
 		int direccion;
+		
+		// Si es una referencia : &ID
+		if(n.isReference()) {
+			if(UtGen.debug)	UtGen.emitirComentario("-> identificador : &id");
+			direccion = tablaSimbolos.getDireccion(n.getNombre(), ultimoAmbito);
+			if(pointer != null) tablaSimbolos.BuscarSimbolo(((NodoAsignacion)pointer).getIdentificador(), ultimoAmbito).setApuntador(direccion);
+			// Cargo es el valor de la direccion de memoria como una constante
+			UtGen.emitirRM("LDC", UtGen.AC, direccion, 0, "cargar direccion de memoria: "+direccion);
+			if(UtGen.debug)	UtGen.emitirComentario("-> identificador");
+			return;
+		}
+		
+		// Si es un puntero: *ID
+		if(n.isPointer()) {
+			if(UtGen.debug)	UtGen.emitirComentario("-> identificador : *id");
+			direccion = tablaSimbolos.BuscarSimbolo(n.getNombre(), ultimoAmbito).getApuntador();
+			// Cargo el valor que se encuentra en la direccion de  memoria a la que estoy apuntando
+			UtGen.emitirRM("LD", UtGen.AC, direccion, 0, "cargar valor de la direccion de memoria a la que apunto: "+ direccion);
+			if(UtGen.debug)	UtGen.emitirComentario("-> identificador");
+			return;
+		}
+		
+		
+		
 		if(UtGen.debug)	UtGen.emitirComentario("-> identificador");
 		direccion = tablaSimbolos.getDireccion(n.getNombre(), ultimoAmbito);
 		UtGen.emitirRM("LD", UtGen.AC, direccion, UtGen.GP, "cargar valor de identificador: "+n.getNombre());

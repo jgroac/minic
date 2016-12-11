@@ -33,5 +33,9 @@ public class NodoVar extends NodoBase {
 	public void setIdentificador(String identificador){
 		this.identificador = identificador;
 	}
+	
+	public boolean isPointer() {
+		return this.pointer;
+	}
 
 }

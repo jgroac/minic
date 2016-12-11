@@ -97,7 +97,7 @@ public class TablaSimbolos {
 		    	NodoVar nodovar = ((NodoVar)raiz);
 		    	String nombreVar = nodovar.getIdentificador();
 		    	tipoVar = nodovar.getTipo();  
-		    	InsertarSimbolo(nombreVar, tipoVar, 0, ultimoAmbito);
+		    	InsertarSimbolo(nombreVar, tipoVar, 0, ultimoAmbito, nodovar.isPointer());
 		    	//TODO: Añadir el numero de linea y localidad de memoria correcta
 		    }
 		    
@@ -149,7 +149,7 @@ public class TablaSimbolos {
 	}
 	
 	//true es nuevo no existe se insertara, false ya existe NO se vuelve a insertar 
-	public boolean InsertarSimbolo(String identificador, String tipo, int numLinea, String ambito){
+	public boolean InsertarSimbolo(String identificador, String tipo, int numLinea, String ambito, boolean isPointer){
 		HashMap<String, RegistroSimbolo> tablaAmbito = tabla.get(ambito);
 		
 		// Si el ambito no existe mostrar error
@@ -160,7 +160,7 @@ public class TablaSimbolos {
 			
 		// Si la variable ya fue declarada lanzar error;	
 		if(!tablaAmbito.containsKey(identificador)) {
-			RegistroSimbolo simbolo = new RegistroSimbolo(identificador, tipo, numLinea, direccion++, ambito);
+			RegistroSimbolo simbolo = new RegistroSimbolo(identificador, tipo, numLinea, direccion++, ambito, isPointer);
 			tablaAmbito.put(identificador, simbolo);
 			return true;
 		}
@@ -178,7 +178,7 @@ public class TablaSimbolos {
 	public RegistroSimbolo BuscarFuncion(String identificador){
 		if(tablaFunciones.containsKey(identificador)){
 			String tipo = tablaFunciones.get(identificador);
-			return new RegistroSimbolo(identificador, tipo, 0, 0, "Programa");
+			return new RegistroSimbolo(identificador, tipo, 0, 0, "Programa", false);
 		}
 		return null;
 	}
@@ -203,7 +203,7 @@ public class TablaSimbolos {
 	
 	private void cargarAgumentos(NodoBase nodo){
     	NodoVar args = (NodoVar) nodo;
-    	InsertarSimbolo(args.getIdentificador(), args.getTipo(), 0, ultimoAmbito);
+    	InsertarSimbolo(args.getIdentificador(), args.getTipo(), 0, ultimoAmbito, false);
     	listaArgumentos.add(args.getIdentificador());
     
 		if (args.TieneHermano()) cargarAgumentos(((NodoVar)nodo).getHermanoDerecha());

@@ -540,7 +540,10 @@ factor ::= 		LPAREN exp:ex RPAREN
 				| AMP ID:variable 
 					{:
 						if(debug) System.out.println("\t Regla 25d");
-						RESULT = new NodoIdentificador(variable, null, true);
+						NodoIdentificador nodoID = new NodoIdentificador(variable, null, false);
+						nodoID.setReference(true);
+						RESULT = nodoID;
+
 					:}
 				| NUM: valor
 					{:
