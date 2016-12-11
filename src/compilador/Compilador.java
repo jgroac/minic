@@ -21,7 +21,7 @@ public class Compilador {
 //			parser_obj=new parser(s,sf);
 //		}
 		
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/ejemplo.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/for.mc"),sf),sf);
 
 		parser_obj.parse();
 		
