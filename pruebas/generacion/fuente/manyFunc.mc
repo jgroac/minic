@@ -1,16 +1,18 @@
-int sum3(){
+void sum3(){
+    sum2();
+}
+void sum2(){
+    sum();
+}
+
+void sum() {
+    prueba();
+}
+
+void prueba() {
     puts(3);
 }
 
-int sum2(){
-    sum3();
-}
-
-int sum() {
-    sum2();
-}
-
-
 void main(){
-	sum();
+	sum3();
 }

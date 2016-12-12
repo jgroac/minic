@@ -180,7 +180,7 @@ public class Generador {
 		}	
 		//Poner en NL la linea actual + 1
 		if(UtGen.debug)	UtGen.emitirComentario("-> CALLFUNC");
-		UtGen.emitirRM("LDA", UtGen.NL, 1, UtGen.PC, "(AC=Pos actual + 1)");
+		UtGen.emitirRM("LDA", UtGen.NL, 1, UtGen.PC, "AC=Pos actual + 1");
 		
 		//saltar a la linea donde empieza la funcion
 		int pos = tablaSimbolos.getTablaPosFun(((n.getNombreFuncion())));
