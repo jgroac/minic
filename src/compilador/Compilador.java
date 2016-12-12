@@ -22,7 +22,7 @@ public class Compilador {
 //			parser_obj=new parser(s,sf);
 //		}
 		
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/manyFunc.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/fibonacci.mc"),sf),sf);
 
 		parser_obj.parse();
 		
