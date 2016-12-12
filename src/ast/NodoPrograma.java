@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.ArrayList;
+
 public class NodoPrograma extends NodoBase {
 	private NodoBase lista_funciones;
 	private NodoBase mainf;
@@ -41,6 +43,29 @@ public class NodoPrograma extends NodoBase {
 	
 	public NodoBase getListaFunciones() {
 		return this.lista_funciones;
+	}
+	
+	public void organizarFunciones() {
+		ArrayList<NodoFuncion> funciones = new ArrayList<NodoFuncion>();
+		NodoFuncion funcion = (NodoFuncion) this.lista_funciones;
+		// Se agregan todas las funciones al arrayList
+		while(funcion != null) {
+			funciones.add(funcion);
+			funcion = (NodoFuncion) funcion.getHermanoDerecha();
+		}
+		
+		
+		// Se recorre el arraylist en sentido inverso para organizar las funciones
+		for(int i = funciones.size() - 1; i > 0 ; i--){
+			funcion = funciones.get(i);
+			funcion.setHermanoDerecha(funciones.get( i - 1));
+		}
+		
+		funciones.get(0).setHermanoDerecha(null);
+		
+		funcion = funciones.get(funciones.size() - 1);
+		this.lista_funciones = funcion;
+		
 	}
 	
 }

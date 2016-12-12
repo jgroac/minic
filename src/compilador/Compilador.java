@@ -1,6 +1,7 @@
 package compilador;
 
 import ast.NodoBase;
+import ast.NodoPrograma;
 import java_cup.runtime.DefaultSymbolFactory;
 import java_cup.runtime.SymbolFactory;
 
@@ -30,6 +31,8 @@ public class Compilador {
 		System.out.println();
 		System.out.println("IMPRESION DEL AST GENERADO");
 		System.out.println();
+		// Organizo las funciones en orden
+		((NodoPrograma)root).organizarFunciones();
 		ast.Util.imprimirAST(root);
 		TablaSimbolos ts = new TablaSimbolos();
 		ts.cargarTabla(root);
