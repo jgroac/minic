@@ -1,16 +1,17 @@
-void sum3(){
-    sum2();
-}
-void sum2(){
-    sum();
+void prueba() {
+    puts(3);
 }
 
 void sum() {
     prueba();
 }
 
-void prueba() {
-    puts(3);
+void sum2(){
+    sum();
+}
+
+void sum3(){
+    sum2();
 }
 
 void main(){
