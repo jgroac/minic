@@ -48,6 +48,11 @@ public class NodoPrograma extends NodoBase {
 	public void organizarFunciones() {
 		ArrayList<NodoFuncion> funciones = new ArrayList<NodoFuncion>();
 		NodoFuncion funcion = (NodoFuncion) this.lista_funciones;
+		
+		// Si no hay funciones no ordene
+		if(this.lista_funciones == null) return;
+		
+		
 		// Se agregan todas las funciones al arrayList
 		while(funcion != null) {
 			funciones.add(funcion);
