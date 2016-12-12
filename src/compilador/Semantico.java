@@ -67,7 +67,7 @@ public class Semantico {
 				
 				if(((NodoFor) raiz).getExpresion() instanceof NodoOperacion){
 					if(comprobarTipoOperacion(((NodoFor) raiz).getExpresion()) != "Boolean"){
-						System.out.println("Error, la expresión no es booleana");
+						printError("Error, la expresión no es booleana");
 						this.anyError = true;
 					}
 				}				
@@ -75,13 +75,14 @@ public class Semantico {
 			}
 			
 			else if(raiz instanceof NodoAsignacion){
-				this.anyError = !comprobarAsignacion(raiz);
+				if(!this.anyError) this.anyError = !comprobarAsignacion(raiz);
+				comprobarAsignacion(raiz);
 			}
 			
 			else if(raiz instanceof NodoCallFunc){
 				NodoCallFunc fun = (NodoCallFunc)raiz;
 				if(this.tablaSimbolos.BuscarFuncion(fun.getNombreFuncion()) == null){
-					System.out.println("La funcion " + fun.getNombreFuncion()+ " no de encuentra definida");
+					printError("La funcion: " + fun.getNombreFuncion()+ " no de encuentra definida");
 					this.anyError = true;
 					// Asignar error al semantico
 				}
@@ -93,7 +94,7 @@ public class Semantico {
 
 	private void comprobarIf(NodoBase nodo){
 		if(comprobarTipoOperacion(((NodoIf)nodo).getPrueba()) != "Boolean"){
-			System.out.println("La operación no devuelve un valor booleano");
+			printError("La operación no devuelve un valor booleano");
 			this.anyError = true;
 		}
 		recorrido(((NodoIf)nodo).getCuerpoIf());
@@ -105,7 +106,7 @@ public class Semantico {
 	private void comprobarWhile(NodoBase nodo){
 		recorrido(((NodoWhile)nodo).getPrueba());
 		if(comprobarTipoOperacion(((NodoWhile)nodo).getPrueba()) != "Boolean"){
-			System.out.println("La operación no devuelve un valor booleano");
+			printError("La operación no devuelve un valor booleano");
 			this.anyError = true;
 		}
 		recorrido(((NodoWhile)nodo).getCuerpo());
@@ -116,7 +117,7 @@ public class Semantico {
 		recorrido(((NodoDoWhile)nodo).getPrueba());
 		
 		if(comprobarTipoOperacion(((NodoDoWhile)nodo).getPrueba()) != "Boolean"){
-			System.out.println("La operación no devuelve un valor booleano");
+			printError("La operación no devuelve un valor booleano");
 			this.anyError = true;
 		}	
 	}
@@ -130,7 +131,7 @@ public class Semantico {
 		if(verificarExistencia(identificador, ultimoAmbito)){
 			if(nodoasig.getExpresion() instanceof NodoOperacion) {
 				if (comprobarTipoOperacion(nodoasig.getExpresion()) == "Error") {
-					System.out.println("Los tipos de la operacion son diferentes");
+					printError("Los tipos de la operacion son diferentes (asignacion): " + identificador );
 					return false;
 				} else {
 					return true;
@@ -143,25 +144,25 @@ public class Semantico {
 					if(func.getTipo() == simboloasig.getTipo()) {
 						return true;
 					} else {
-						System.out.println("El tipo de " + simboloasig.getIdentificador() + " el tipo de " + funcName + " no son el mismo");
+						printError("El tipo de " + simboloasig.getIdentificador() + " el tipo de la funcion " + funcName + " no son el mismo");
 						return false;
 					}
 				} else {
-					System.out.println("La funcion no esta definida");
+					printError("La funcion: " + funcName + " no esta definida");
 					return false;
 				}
 			}
 			else if(nodoasig.getExpresion() instanceof NodoIdentificador) {
 				RegistroSimbolo simboloder = this.tablaSimbolos.BuscarSimbolo(((NodoIdentificador)nodoasig.getExpresion()).getNombre(), ultimoAmbito);
 				if(simboloder == null) {
-					System.out.println("La variable " + ((NodoIdentificador)nodoasig.getExpresion()).getNombre()  + " no esta definida");
+					printError("La variable " + ((NodoIdentificador)nodoasig.getExpresion()).getNombre()  + " no esta definida");
 					return false;
 				}
 				
 				if(simboloasig.getTipo() == simboloder.getTipo()) {
 					return true;
 				} else {
-					System.out.println("Los tipo " +simboloasig.getIdentificador()  + "  ," + simboloder.getIdentificador() + " son incopatibles");
+					printError("Los tipo " +simboloasig.getIdentificador()  + "  ," + simboloder.getIdentificador() + " son incopatibles");
 					return false;
 				}
 			}
@@ -174,7 +175,7 @@ public class Semantico {
 				if(simboloasig.getTipo() == tipo) {
 					return true;
 				} else {
-					System.out.println("Los tipos de datos no son captibles:" + simboloasig.getTipo() + " " + tipo );
+					printError("Los tipos de datos no son captibles:" + simboloasig.getTipo() + " " + tipo );
 					return false;
 				}
 			}
@@ -182,7 +183,7 @@ public class Semantico {
 			
 			return true;
 		}else{
-			System.out.print("El Identificador " + identificador + " no ha sido definido");
+			printError("El Identificador " + identificador + " no ha sido definido");
 			return false;
 		}
 	}
@@ -239,7 +240,7 @@ public class Semantico {
 				String tipo = this.tablaSimbolos.BuscarSimbolo(nombre, ultimoAmbito).getTipo();
 				return tipo;
 			}
-			System.out.println("Error la variable " + nombre + " no esta definida");
+			printError("Error la variable " + nombre + " no esta definida");
 			return "Error";
 		}
 		
@@ -261,11 +262,11 @@ public class Semantico {
 		if(simbolo != null) {
 
 			if(simbolo.getTipo() != "Integer"){
-				System.out.println("El parametro de la funcion gets() no es un entero");
+				printError("El parametro de la funcion gets() no es un entero");
 				this.anyError = true;
 			}
 		}else{
-			System.out.println("Variable no declarada");
+			printError("Variable no declarada ");
 			this.anyError = true;
 		}
 	}
@@ -279,11 +280,11 @@ public class Semantico {
 			RegistroSimbolo simbolo = this.tablaSimbolos.BuscarSimbolo(identificador, ultimoAmbito);
 			if(simbolo != null){
 				if(simbolo.getTipo() != "Integer"){
-					System.out.println("El parametro de la funcion puts() no es una variable u operacion entera");
+					printError("El parametro de la funcion puts() no es una variable u operacion entera");
 					this.anyError = true;
 				}
 			}else{
-				System.out.println("Variable no declarada");
+				printError("Variable no declarada");
 				this.anyError = true;
 			}			
 		}
@@ -291,14 +292,14 @@ public class Semantico {
 		/*------- Verificar que la operacion aritmetica devuelva un enetro -------*/
 		else if(nodoEscribir.getExpresion() instanceof NodoOperacion){
 			if(comprobarTipoOperacion(nodoEscribir.getExpresion()) != "Integer") {
-				System.out.println("La funcion puts acepta solo expresiones enteras");
+				printError("La funcion puts acepta solo expresiones enteras");
 				this.anyError = true;
 			}
 		}
 		else if(nodoEscribir.getExpresion() instanceof NodoValor){
 			NodoValor valor = (NodoValor) nodoEscribir.getExpresion();
 			if(valor.getTipo() != 0) {
-				System.out.println("La funcion puts acepta solo expresiones enteras");
+				printError("La funcion puts acepta solo expresiones enteras");
 				this.anyError = true;
 			}
 		}
@@ -310,6 +311,10 @@ public class Semantico {
 
 	private boolean verificarExistencia(String nombre, String ambito){
 		return this.tablaSimbolos.BuscarSimbolo(nombre, ambito) != null;
+	}
+	
+	private void printError(Object chain){		
+		System.err.println("[Error Semantico]: " + chain);
 	}
 
 }

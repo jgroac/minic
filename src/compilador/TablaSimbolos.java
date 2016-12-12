@@ -237,6 +237,10 @@ public class TablaSimbolos {
 	public ArrayList<String> getArgsFuncion(String ambito){
 		return this.tablaDeArgumentos.get(ambito);
 	}
+	
+	public boolean getError() {
+		return this.error;
+	}
 	/*
 	 * TODO:
 	 * 1. Crear lista con las lineas de codigo donde la variable es usada.

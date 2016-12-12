@@ -22,7 +22,7 @@ public class Compilador {
 //			parser_obj=new parser(s,sf);
 //		}
 		
-		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/fibonacci.mc"),sf),sf);
+		parser_obj=new parser(new Scanner(new java.io.FileInputStream("pruebas/generacion/fuente/ejemplo.mc"),sf),sf);
 
 		parser_obj.parse();
 		
@@ -37,13 +37,16 @@ public class Compilador {
 		TablaSimbolos ts = new TablaSimbolos();
 		ts.cargarTabla(root);
 		ts.ImprimirClaves();
+
 		Semantico analizadorSemantico = new Semantico(ts);
 		analizadorSemantico.recorrido(root);
 		
 		// Si el semantico no tiene errores se genera codigo
-		if(!analizadorSemantico.hasErrors()){
+		if(!analizadorSemantico.hasErrors() && !ts.getError()){
 			compilador.Generador.setTablaSimbolos(ts);
 			compilador.Generador.generarCodigoObjeto(root);
+		} else {
+			System.err.println("Errores semanticos encontrados, resuelvalos e intente compilar de nuevo");
 		}
 	}
 	
